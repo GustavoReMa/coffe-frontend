@@ -1,4 +1,5 @@
 package com.coffe.front;
+
 import com.coffee.back.ConfigureProductDI;
 import com.coffee.back.ConfigureUserDI;
 import com.coffee.back.controller.impl.ProductCtrlImpl;
@@ -11,9 +12,13 @@ import com.google.inject.Injector;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import static java.lang.String.valueOf;
 import java.util.ArrayList;
@@ -31,30 +36,36 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableModel;
-/**
- *
- * @author Bienvenido
+import javax.swing.table.TableModel;
+
+/*La clase administrador contiene todas las funcionalidades del administrador como lo son;
+alta producto, modificar producto, consulta producto, baja producto, alta usuario, baja 
+usuario, modificar usuario, visualizar estadísticas, realizar reporte y cerrar sesión.
  */
 public class Administrador extends javax.swing.JFrame {
-    private JFileChooser fileChooser;
-    private String direcImagen="";
-    private ProductVO producto;
-    private List <ProductVO> productoo;
-    private WorkerVO trabajador;
-    private UserVO usuario;
-    private String categoria;
-    Toolkit t = Toolkit.getDefaultToolkit();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
-        
-    
-    /**
-     * Creates new form Usuario
+//Declaración de algunas variables de las clases
+    private JFileChooser fileChooser; //Objeto encargada de escoger la ruta de una imagen
+    private String direcImagen = ""; //Variable que contendrá la ruta de la imagen
+    private ProductVO producto; //Objeto que contendrá todos los atributos de un producto
+    private List<ProductVO> productoo; //Objeto que contendrá a una lista de productos
+    private WorkerVO trabajador; //Objeto que contendrá los atributos de un trabajador (usuario)
+    private UserVO usuario; //Objeto que contendrá el nick del usuario y su contraseña
+    private String categoria; //Variable que contendrá la categoría del producto
+    Toolkit t = Toolkit.getDefaultToolkit(); //Objeto que manejará propiedades de la pantalla
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //Objeto que almacenará el tamaño de la pantalla
+    JTable tabla = new JTable(); //Objeto que creará una tabla emergente
+
+    /*
+    Éste método es un constructor que inicializa todas las variables utilizadas en la interfaz al crear una 
+    instacia de ésta clase
      */
+    
     public Administrador() {
-        initComponents();
+        initComponents(); //Método que inicizaliza todas las variables  
         this.setVisible(true);
-        inicializarDatosUsuarios();
     }
 
     /**
@@ -127,6 +138,8 @@ public class Administrador extends javax.swing.JFrame {
         cancelarUsuMOD = new javax.swing.JButton();
         buscarUsuMOD = new javax.swing.JButton();
         fotoUsuMOD1 = new javax.swing.JButton();
+        jLabel15 = new javax.swing.JLabel();
+        nickUsuMOD = new javax.swing.JTextField();
         productoGeneral = new javax.swing.JTabbedPane();
         productoAltaGral = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
@@ -209,39 +222,38 @@ public class Administrador extends javax.swing.JFrame {
         panelPrincipalLayout.setHorizontalGroup(
             panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelPrincipalLayout.createSequentialGroup()
-                .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(panelPrincipalLayout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(59, 59, 59)
+                .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPrincipalLayout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 435, Short.MAX_VALUE)
                         .addComponent(realizarReporteVentas))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelPrincipalLayout.createSequentialGroup()
-                        .addGap(101, 101, 101)
-                        .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(panelPrincipalLayout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelPrincipalLayout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 323, Short.MAX_VALUE)))
+                    .addGroup(panelPrincipalLayout.createSequentialGroup()
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(panelPrincipalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panelPrincipalLayout.setVerticalGroup(
             panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelPrincipalLayout.createSequentialGroup()
                 .addGap(24, 24, 24)
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(panelPrincipalLayout.createSequentialGroup()
-                        .addComponent(realizarReporteVentas)
-                        .addGap(29, 29, 29)
-                        .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(105, 105, 105)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(293, Short.MAX_VALUE))
+                    .addComponent(realizarReporteVentas, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelPrincipalLayout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(85, 85, 85)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(283, Short.MAX_VALUE))
         );
 
         cerrarSesionVentas.setBackground(new java.awt.Color(6, 133, 135));
@@ -285,12 +297,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel16.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel16.setForeground(new java.awt.Color(0, 102, 102));
         jLabel16.setText("NOMBRE");
-
-        nombreUsuAL.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nombreUsuALActionPerformed(evt);
-            }
-        });
 
         jLabel19.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel19.setForeground(new java.awt.Color(0, 102, 102));
@@ -571,12 +577,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel9.setForeground(new java.awt.Color(0, 102, 102));
         jLabel9.setText("NOMBRE");
 
-        nombreUsuMOD.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nombreUsuMODActionPerformed(evt);
-            }
-        });
-
         jLabel10.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(0, 102, 102));
         jLabel10.setText("APELLIDO");
@@ -625,6 +625,16 @@ public class Administrador extends javax.swing.JFrame {
         fotoUsuMOD1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         fotoUsuMOD1.setText("FOTO");
 
+        jLabel15.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(0, 102, 102));
+        jLabel15.setText("NICK");
+
+        nickUsuMOD.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nickUsuMODActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout usuarioModificarGralLayout = new javax.swing.GroupLayout(usuarioModificarGral);
         usuarioModificarGral.setLayout(usuarioModificarGralLayout);
         usuarioModificarGralLayout.setHorizontalGroup(
@@ -640,21 +650,27 @@ public class Administrador extends javax.swing.JFrame {
                     .addComponent(cancelarUsuMOD, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
                 .addGap(64, 64, 64))
             .addGroup(usuarioModificarGralLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(usuarioModificarGralLayout.createSequentialGroup()
-                        .addComponent(jLabel13)
-                        .addGap(28, 28, 28)
-                        .addComponent(passwordUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(usuarioModificarGralLayout.createSequentialGroup()
-                            .addComponent(jLabel12)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(direccionUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(usuarioModificarGralLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel9)
-                            .addGap(55, 55, 55)
-                            .addComponent(nombreUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jLabel15))
+                        .addGap(55, 55, 55)
+                        .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(nickUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(nombreUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(usuarioModificarGralLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(usuarioModificarGralLayout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(direccionUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(usuarioModificarGralLayout.createSequentialGroup()
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(passwordUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buscarUsuMOD)
                 .addGap(28, 28, 28)
@@ -673,7 +689,7 @@ public class Administrador extends javax.swing.JFrame {
                         .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(emailUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(telefonoUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(62, Short.MAX_VALUE))
+                .addContainerGap(72, Short.MAX_VALUE))
         );
         usuarioModificarGralLayout.setVerticalGroup(
             usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -685,13 +701,19 @@ public class Administrador extends javax.swing.JFrame {
                     .addComponent(jLabel10)
                     .addComponent(apellidoUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buscarUsuMOD))
-                .addGap(86, 86, 86)
+                .addGap(42, 42, 42)
+                .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nickUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15))
+                .addGap(16, 16, 16)
                 .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(telefonoUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel11)
-                    .addComponent(direccionUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel12))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                    .addComponent(jLabel11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(direccionUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
                 .addGroup(usuarioModificarGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(passwordUsuMOD, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -876,22 +898,10 @@ public class Administrador extends javax.swing.JFrame {
         jLabel37.setForeground(new java.awt.Color(0, 102, 102));
         jLabel37.setText("NOMBRE");
 
-        nombreProdMOD.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nombreProdMODActionPerformed(evt);
-            }
-        });
-
         jLabel39.setBackground(new java.awt.Color(0, 102, 102));
         jLabel39.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel39.setForeground(new java.awt.Color(0, 102, 102));
         jLabel39.setText("PRECIO");
-
-        precioProdMOD.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                precioProdMODActionPerformed(evt);
-            }
-        });
 
         jLabel40.setBackground(new java.awt.Color(0, 102, 102));
         jLabel40.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -906,15 +916,15 @@ public class Administrador extends javax.swing.JFrame {
         guardarProdMOD.setBackground(new java.awt.Color(6, 133, 135));
         guardarProdMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         guardarProdMOD.setText("GUARDAR");
+        guardarProdMOD.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                guardarProdMODActionPerformed(evt);
+            }
+        });
 
         cancelarProdMOD.setBackground(new java.awt.Color(6, 133, 135));
         cancelarProdMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         cancelarProdMOD.setText("CANCELAR");
-        cancelarProdMOD.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelarProdMODActionPerformed(evt);
-            }
-        });
 
         jLabel41.setBackground(new java.awt.Color(0, 102, 102));
         jLabel41.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -1025,12 +1035,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel43.setForeground(new java.awt.Color(0, 102, 102));
         jLabel43.setText("NOMBRE");
 
-        nombreProdCON.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nombreProdCONActionPerformed(evt);
-            }
-        });
-
         aceptarProdCON.setBackground(new java.awt.Color(6, 133, 135));
         aceptarProdCON.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         aceptarProdCON.setText("ACEPTAR");
@@ -1121,20 +1125,9 @@ public class Administrador extends javax.swing.JFrame {
         jLabel45.setForeground(new java.awt.Color(0, 102, 102));
         jLabel45.setText("NOMBRE");
 
-        nombreProdBA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nombreProdBAActionPerformed(evt);
-            }
-        });
-
         buscarProdBA.setBackground(new java.awt.Color(6, 133, 135));
         buscarProdBA.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         buscarProdBA.setText("BUSCAR");
-        buscarProdBA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buscarProdBAActionPerformed(evt);
-            }
-        });
 
         eliminarProdBA.setBackground(new java.awt.Color(6, 133, 135));
         eliminarProdBA.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -1290,98 +1283,84 @@ public class Administrador extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void inicializarDatosUsuarios(){
-        
-    }
-    private void nombreUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nombreUsuMODActionPerformed
-    
-// TODO add your handling code here:
-    }//GEN-LAST:event_nombreUsuMODActionPerformed
-
     private void cancelarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuMODActionPerformed
-    
-    }//GEN-LAST:event_cancelarUsuMODActionPerformed
 
-    private void nombreUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nombreUsuALActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nombreUsuALActionPerformed
+    }//GEN-LAST:event_cancelarUsuMODActionPerformed
 
     private void cancelarUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuALActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cancelarUsuALActionPerformed
-
+    /*Método que se encarga de limpiar los datos en pantalla al momento que el usuario
+    de click en el botón cancelar
+    */
     private void cancelarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdALActionPerformed
+        //Limpiamos los campos de la pantalla de alta producto
+        int valor=0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
         nombreProdAL.setText("");
+        cantidadProdAL.getModel().setValue(valor);
+        precioProdAL.setText("");
+        categoriaProdAL.setSelectedIndex(0);
+        imagenProdAL2.setIcon(null);
     }//GEN-LAST:event_cancelarProdALActionPerformed
-
-    private void nombreProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nombreProdMODActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nombreProdMODActionPerformed
-
-    private void precioProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_precioProdMODActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_precioProdMODActionPerformed
-
-    private void cancelarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdMODActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cancelarProdMODActionPerformed
-
-    private void nombreProdCONActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nombreProdCONActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nombreProdCONActionPerformed
-
-    private void nombreProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nombreProdBAActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nombreProdBAActionPerformed
-
+    /*Método que se encargará de leer los datos ingresados en la interfaz 
+    y los mandará a los métodos correspondientes para manejar los datos     
+    */
     private void guardarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdALActionPerformed
-        //Se crea un objeto del producto y se llenan sus valores
-        producto = new ProductVO();
+        producto = new ProductVO(); 
+        //Inicia obtención de datos ingresados en la interfaz 
         producto.setProductName(nombreProdAL.getText());
-        
-        String cantidadString=valueOf(cantidadProdAL.getValue().toString()); 
-        Short cantidad=Short.parseShort(cantidadString);
+        String cantidadString = valueOf(cantidadProdAL.getValue().toString());
+        Short cantidad = Short.parseShort(cantidadString);
         producto.setQuantity(cantidad);
-            Double precio=Double.parseDouble(precioProdAL.getText());
+        Double precio = Double.parseDouble(precioProdAL.getText());
         producto.setPriceTag(precio);
         producto.setCategoryName(getCategoria());
-          System.out.println("result of getCategory 1"+ getCategoria());
         producto.setImage(getDireccionImagen());
-        
-        //Se establece un injector y controlador para producto
-        Injector injector = Guice.createInjector(new ConfigureProductDI());
+        //Finaliza obtención de datos 
+        /*
+        Se establece un injector y controlador para producto
+        Injector: se encargará de la comunicación de la base de datos con java
+        Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
+        */
+        Injector injector = Guice.createInjector(new ConfigureProductDI()); 
         ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
         String productRecover = productCtrl.altaProducto(producto);
         JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
-        //seteamos los campos
-        System.out.println("Terminoooo");
+        //Limpiamos los campos de la pantalla de alta producto
+        int valor=0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
+        nombreProdAL.setText("");
+        cantidadProdAL.getModel().setValue(valor);
+        precioProdAL.setText("");
+        categoriaProdAL.setSelectedIndex(0);
+        imagenProdAL2.setIcon(null);
+
     }//GEN-LAST:event_guardarProdALActionPerformed
 
     private void imagenProd1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_imagenProd1MouseClicked
-        fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG","jpg","png");
-        fileChooser.setFileFilter(filter);
-        //Valor que tomará el fileChooser
-        int regresaValor=fileChooser.showOpenDialog(null);
+        fileChooser = new JFileChooser(); //Se declara una variable de tipo JFileChooser
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG", "jpg", "png"); //Se le especifica que tipo de archivo queremos que se nos muestre
+        fileChooser.setFileFilter(filter); //Se le pasa como parametro el filtrado a la variable fileChooser 
+        int regresaValor = fileChooser.showOpenDialog(null); //Variable encargada de verificar que la ventana para escoger la imagen se haya acompletado con éxito
         //Acción del fileChooser
-        if(regresaValor==JFileChooser.APPROVE_OPTION){
+        if (regresaValor == JFileChooser.APPROVE_OPTION) {
             //Crear propiedades para ser utilizadas por fileChooser
             File archivoElegido = fileChooser.getSelectedFile();
             //Obteniendo la dirección del archivo
-            String direccion=archivoElegido.getPath();
+            String direccion = archivoElegido.getPath();
             setDireccionImagen(direccion);
-            ImageIcon imagen=new ImageIcon(direccion);
-            System.out.println("Todo bien por aquí");
-            ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(imagenProdAL2.getWidth(),imagenProdAL2.getHeight(),Image.SCALE_DEFAULT));
-            System.out.println("Super bien");
+            //Se crea la imagen para la etiqueta
+            ImageIcon imagen = new ImageIcon(direccion);
+            ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(imagenProdAL2.getWidth(), imagenProdAL2.getHeight(), Image.SCALE_DEFAULT));
             imagenProdAL2.setIcon(icono);
         }
-           
-    }//GEN-LAST:event_imagenProd1MouseClicked
 
+    }//GEN-LAST:event_imagenProd1MouseClicked
+    /* 
+    Método encargado de saber qué categoría presiono el usuario del producto
+    */
     private void categoriaProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoriaProdALActionPerformed
-        JComboBox<String> combo =(JComboBox<String>) evt.getSource();
-        switch(combo.getSelectedIndex()){
+        JComboBox<String> combo = (JComboBox<String>) evt.getSource(); //Se declara una variable de tipo JComboBox
+        switch (combo.getSelectedIndex()) { //Se obtiene el índice de la selección del comboBox
             case 0:
                 categoria = "COMIDA";
                 break;
@@ -1389,164 +1368,195 @@ public class Administrador extends javax.swing.JFrame {
                 categoria = "BEBIDA";
                 break;
         }
-        System.out.println(categoria);
-        
-        
     }//GEN-LAST:event_categoriaProdALActionPerformed
-
+    /*
+    Método encargado de buscar un producto, y verificar qué producto fue selecionado
+    y en base a eso mostrar los datos en pantalla para su modificación
+    */
     private void buscarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarProdMODActionPerformed
-        System.out.println("inicio el método buscar producto de modificar ");
-        productoo = new ArrayList<>();
-        String nombreProdModBuscar=nombreProdMOD.getText();
-        Injector injector = Guice.createInjector(new ConfigureProductDI());
+        productoo = new ArrayList<>(); //se crea un objeto de tipo ArrayList
+        String nombreProdModBuscar = nombreProdMOD.getText(); //Se obtiene el nombre del producto a buscar
+        /*Se declara un injector y se le declara el tipo de clase a la que queremos que haga referencia, en este caso
+        a una configuración de producto */
+        Injector injector = Guice.createInjector(new ConfigureProductDI()); 
+        //Se declara el controlador
         ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-        productoo = productCtrl.buscarProducto(nombreProdModBuscar);
+        //Se guarda en el objeto productoo una lista de todos los productos que coinciden con el nombre
+        productoo = productCtrl.buscarProducto(nombreProdModBuscar); 
         Iterator<ProductVO> productoIterador = productoo.iterator();
-        String data[][]={};
-        String cabeza[] = {"NOMBRE","PRECIO"};
-        DefaultTableModel tm = new DefaultTableModel(data,cabeza);
-        JFrame vtn=new JFrame();
-        JTable tabla = new JTable();
+        //Se declaran variables de tipo vector para los valores de la tabla
+        String data[][] = {};
+        String cabeza[] = {"NOMBRE", "PRECIO"};
+        DefaultTableModel tm = new DefaultTableModel(data, cabeza);
+        JFrame vtn = new JFrame(); //Se crea un JFrame para el contenedor de la tabla de los productos a mostrar
         tabla.setModel(tm);
         vtn.add(tabla);
         vtn.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         vtn.setVisible(true);
-        vtn.setBounds(screenSize.width/4,screenSize.height/4,400,200);
-        while(productoIterador.hasNext()){
+        vtn.setBounds(screenSize.width / 4, screenSize.height / 4, 400, 200);
+        tabla.addMouseListener(new MouseAdapter() { //Se agrega un escuchador a la tabla
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
+                    vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
+                    //Empieza la obtención de los datos del producto que se busco
+                    nombreProdMOD.setText(productoo.get(indice).getProductName());
+                    String valor = productoo.get(indice).getQuantity().toString();
+                    int valorI = Integer.parseInt(valor);
+                    cantidadProdMOD.getModel().setValue(valorI);
+                    precioProdMOD.setText(productoo.get(indice).getPriceTag().toString());
+                    String nombreCat = productoo.get(indice).getCategoryName();
+                    int posicion = 0;
+                    if (nombreCat == "COMIDA") {
+                        posicion = 0;
+                    } else {
+                        posicion = 1;
+                    }
+                    categoriaProdMOD.setSelectedIndex(posicion);
+                    ImageIcon imagen = new ImageIcon(productoo.get(indice).getImage());
+                    ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(imagenProdMOD2.getWidth(), imagenProdMOD2.getHeight(), Image.SCALE_DEFAULT));
+                    imagenProdMOD2.setIcon(icono);
+                    //Finaliza la obtención de los datos 
+                }
+            }
+        });
+        /*Ciclo encargado de obtener los datos de los productos que coinciden con el nombre del que desea buscarse
+        y los agrega al modelo de la tabla
+        */
+        while (productoIterador.hasNext()) { 
             ProductVO productoCiclo = productoIterador.next();
             String nombreArray = productoCiclo.getProductName();
             String precioArray = productoCiclo.getPriceTag().toString();
-            String datos[] = {nombreArray,precioArray}; 
+            String datos[] = {nombreArray, precioArray};
             tm.addRow(datos);
             System.out.println(productoCiclo.getProductName()
-                    +"/"+productoCiclo.getPriceTag().toString());
-        }   
-        
+                    + "/" + productoCiclo.getPriceTag().toString());
+        }
     }//GEN-LAST:event_buscarProdMODActionPerformed
-
+   //Método utilizado para saber en qué fila se dio click a la tabla
+    private int tableMousePressed(MouseEvent evt) {
+        int row = 0;
+        if (evt.getClickCount() == 2) {
+            Point point = evt.getPoint(); //Obtiene los puntos de pantalla
+            row = tabla.rowAtPoint(point); //Obtiene la coordenada en x de la tabla
+        }
+        return row;
+    }
+    //Método encargado de obtener los datos de los ingresados por el usuario para la creación de un usuario
     private void guardarUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarUsuALActionPerformed
-        //Se crea un objeto del producto y se llenan sus valores
-        String passwordUsuario="";
+        //Empieza la obtención de los datos ingresados en el formulario
+        String passwordUsuario = "";
         trabajador = new WorkerVO();
         usuario = new UserVO();
         trabajador.setName(nombreUsuAL.getText());
         usuario.setUserName(nickUsuAL.getText());
         trabajador.setAddress(direccionUsuAL.getText());
-        passwordUsuario=String.copyValueOf(passwordUsuAL.getPassword());
+        passwordUsuario = String.copyValueOf(passwordUsuAL.getPassword());
         usuario.setPassword(passwordUsuario);
         trabajador.setLastName(apellidoUsuAL.getText());
         trabajador.setPhoneNumber(telefonoUsuAL.getText());
         trabajador.setEmail(emailUsuAL.getText());
         trabajador.setPhoto(getDireccionImagen());
-        trabajador.setPhoto(getDireccionImagen());
         trabajador.setUserVO(usuario);
+        //Finaliza la obtención de los datos 
         //Se establece un injector y controlador para usuario
         Injector injector = Guice.createInjector(new ConfigureUserDI());
         UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
         String userRecover = userCtrl.altaUsuario(trabajador);
         JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
-        //seteamos los campos
-        System.out.println("Terminoooo");
+        //Limpiamos los campos de la pantalla de alta producto
+        nombreUsuAL.setText("");
+        nickUsuAL.setText("");
+        direccionUsuAL.setText("");
+        apellidoUsuAL.setText("");
+        telefonoUsuAL.setText("");
+        emailUsuAL.setText("");
+        passwordUsuAL.setText("");
+        fotoUsuAL2.setIcon(null);
     }//GEN-LAST:event_guardarUsuALActionPerformed
 
     private void fotoUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fotoUsuALActionPerformed
-        fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG","jpg","png");
-        fileChooser.setFileFilter(filter);
-        //Valor que tomará el fileChooser
-        int regresaValor=fileChooser.showOpenDialog(null);
+         fileChooser = new JFileChooser(); //Se declara una variable de tipo JFileChooser
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG", "jpg", "png"); //Se le especifica que tipo de archivo queremos que se nos muestre
+        fileChooser.setFileFilter(filter); //Se le pasa como parametro el filtrado a la variable fileChooser 
+        int regresaValor = fileChooser.showOpenDialog(null); //Variable encargada de verificar que la ventana para escoger la imagen se haya acompletado con éxito
         //Acción del fileChooser
-        if(regresaValor==JFileChooser.APPROVE_OPTION){
+        if (regresaValor == JFileChooser.APPROVE_OPTION) {
             //Crear propiedades para ser utilizadas por fileChooser
             File archivoElegido = fileChooser.getSelectedFile();
             //Obteniendo la dirección del archivo
-            String direccion=archivoElegido.getPath();
+            String direccion = archivoElegido.getPath();
             setDireccionImagen(direccion);
-            ImageIcon imagen=new ImageIcon(direccion);
-            ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(fotoUsuAL2.getWidth(),fotoUsuAL2.getHeight(),Image.SCALE_DEFAULT));
+            //Se crea la imagen para el usuario
+            ImageIcon imagen = new ImageIcon(direccion);
+            ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(fotoUsuAL2.getWidth(), fotoUsuAL2.getHeight(), Image.SCALE_DEFAULT));
             fotoUsuAL2.setIcon(icono);
-        }
+        }    
     }//GEN-LAST:event_fotoUsuALActionPerformed
-
+    /*Método utilizado para la consulta de un producto el cual nos mostrará los productos que lleven similitud en 
+    el nombre y lo podremos visualizar en una tabla
+    */
     private void aceptarProdCONActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aceptarProdCONActionPerformed
-        productoo = new ArrayList<>();
-        String nombreProdCONBuscar=nombreProdCON.getText();
+        productoo = new ArrayList<>(); //Se declara un objeto de tipo ArrayList el cual contendrá los productos que coincidan con el que se quiere buscar
+        String nombreProdCONBuscar = nombreProdCON.getText(); //Se obtiene el nombre del producto a buscar
+        //Se establece el injector para producto
         Injector injector = Guice.createInjector(new ConfigureProductDI());
+        //Se establece el controlador para el producto a buscar
         ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-        productoo = productCtrl.buscarProducto(nombreProdCONBuscar);
+        productoo = productCtrl.buscarProducto(nombreProdCONBuscar); //Obtiene la lista de los productos encontrados 
         Iterator<ProductVO> productoIterador = productoo.iterator();
-        String data[][]={};
-        String cabeza[] = {"NOMBRE","CANTIDAD","PRECIO","CATEGORÍA"};
-        DefaultTableModel tm = new DefaultTableModel(data,cabeza);
+        String data[][] = {};
+        String cabeza[] = {"NOMBRE", "CANTIDAD", "PRECIO", "CATEGORÍA"};
+        DefaultTableModel tm = new DefaultTableModel(data, cabeza);
         jTable1.setModel(tm);
         String nombreArray;
         String cantidadArray;
         String precioArray;
         String categoriaArray;
-        while(productoIterador.hasNext()){
+        while (productoIterador.hasNext()) {
             ProductVO productoCiclo = productoIterador.next();
             nombreArray = productoCiclo.getProductName();
             cantidadArray = productoCiclo.getQuantity().toString();
             precioArray = productoCiclo.getPriceTag().toString();
             categoriaArray = productoCiclo.getCategoryName();
-            String datos[] = {nombreArray,precioArray,precioArray,categoriaArray}; 
+            String datos[] = {nombreArray, precioArray, precioArray, categoriaArray};
             tm.addRow(datos);
-            System.out.println("Consulta terminada; "+categoriaArray);
-        }   
-        
-        
+            System.out.println("Consulta terminada; " + categoriaArray);
+        }
+
+
     }//GEN-LAST:event_aceptarProdCONActionPerformed
 
-    private void buscarProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarProdBAActionPerformed
-        productoo = new ArrayList<>();
-        int contador=0;
-        String nombreProdBajaBuscar=nombreProdBA.getText();
-        Injector injector = Guice.createInjector(new ConfigureProductDI());
-        ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-        productoo = productCtrl.buscarProducto(nombreProdBajaBuscar);
-        Iterator<ProductVO> productoIterador = productoo.iterator();
-        String nombreArray;
-        String dirFoto[]=new  String[10];
-        String nombreComp="";
-        JLabel contenedor;
-        while(productoIterador.hasNext()){
-        ProductVO productoCiclo = productoIterador.next();
-        nombreArray = productoCiclo.getProductName();
-        dirFoto[contador]=productoCiclo.getImage();
-        System.out.println("consulta baja terminada; "+nombreArray);
-        }   
-        crearFotoEliminarProducto(contador,dirFoto);
-    }//GEN-LAST:event_buscarProdBAActionPerformed
-
     private void buscarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarUsuMODActionPerformed
-        String nombreUsuarioMod=nombreUsuMOD.getText();
+        String nombreUsuarioMod = nombreUsuMOD.getText();
         Injector injector = Guice.createInjector(new ConfigureUserDI());
         UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
         //Cambiar por modificar usuario
         String userRecover = userCtrl.altaUsuario(trabajador);
         JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
-        
+
     }//GEN-LAST:event_buscarUsuMODActionPerformed
 
     private void cerrarSesionVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarSesionVentasActionPerformed
         JFrame contenedorSes = new JFrame();
-        contenedorSes.setBounds(screenSize.width/4,screenSize.height/4,300,100);
+        contenedorSes.setBounds(screenSize.width / 4, screenSize.height / 4, 220, 100);
         contenedorSes.setVisible(true);
         contenedorSes.setResizable(false);
-        JPanel contenedorPanel=new JPanel();
-        JLabel cerrarSes=new JLabel("¿Estás seguro que deseas cerrar sesión?");
-        JButton aceptoCerrarSesion=new JButton("ACEPTO");
-        JButton cancelarCerrarSesion=new JButton("CANCELAR");
-        aceptoCerrarSesion.addActionListener(new ActionListener(){
+        JPanel contenedorPanel = new JPanel();
+        JLabel cerrarSes = new JLabel("¿Estás seguro de salir?");
+        JButton aceptoCerrarSesion = new JButton("ACEPTAR");
+        JButton cancelarCerrarSesion = new JButton("CANCELAR");
+        aceptoCerrarSesion.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            contenedorSes.dispose();
-            dispose();
-            Inicio inicioNew=new Inicio();
-            inicioNew.setVisible(true);
+                contenedorSes.dispose();
+                dispose();
+                Inicio inicioNew = new Inicio();
+                inicioNew.setVisible(true);
             }
         });
-        cancelarCerrarSesion.addActionListener(new ActionListener(){
+        cancelarCerrarSesion.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 contenedorSes.dispose();
@@ -1556,52 +1566,60 @@ public class Administrador extends javax.swing.JFrame {
         contenedorPanel.add(aceptoCerrarSesion);
         contenedorPanel.add(cancelarCerrarSesion);
         contenedorSes.add(contenedorPanel);
-        
     }//GEN-LAST:event_cerrarSesionVentasActionPerformed
-    private void crearFotoEliminarProducto(int cont,String[] dir){
-        switch(cont){
+
+    private void nickUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nickUsuMODActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nickUsuMODActionPerformed
+
+    private void guardarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdMODActionPerformed
+        
+    }//GEN-LAST:event_guardarProdMODActionPerformed
+    private void crearFotoEliminarProducto(int cont, String[] dir) {
+        switch (cont) {
             case 1:
-                
-            break;
+
+                break;
             case 2:
-                
-            break;
+
+                break;
             case 3:
-                
-            break;
+
+                break;
             case 4:
-                
-            break;
+
+                break;
             case 5:
-                
-            break;
+
+                break;
             case 6:
-                
-            break;
+
+                break;
             default:
                 System.out.println("Algo fallo");
-            break;
-            
+                break;
+
         }
     }
-    private String getCategoria(){
+
+    private String getCategoria() {
         return categoria;
     }
-    private void setDireccionImagen(String direccion){
-        direcImagen=direccion;
+
+    private void setDireccionImagen(String direccion) {
+        direcImagen = direccion;
     }
-    private String getDireccionImagen(){
+
+    private String getDireccionImagen() {
         return direcImagen;
     }
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        
+        new Administrador().setVisible(true);
 
-        
-                new Administrador().setVisible(true);
- 
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1657,6 +1675,7 @@ public class Administrador extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
@@ -1695,6 +1714,7 @@ public class Administrador extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField nickUsuAL;
+    private javax.swing.JTextField nickUsuMOD;
     private javax.swing.JTextField nombreProdAL;
     private javax.swing.JTextField nombreProdBA;
     private javax.swing.JTextField nombreProdCON;

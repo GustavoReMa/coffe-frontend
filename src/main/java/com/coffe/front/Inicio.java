@@ -7,22 +7,15 @@ import com.coffee.back.controller.vo.UserVO;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import javax.swing.JOptionPane;
-
-/**
- *
- * @author Bienvenido
- */
+/*Clase que cuenta con la funcionalidad de aceptar datos y mandarlos a los controladores
+para verificar los datos en la base de datos y si existen abrirles la interfaz correspondiente
+*/
 public class Inicio extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Inicio
-     */
     public Inicio() {
         initComponents();
        //  setIconImage(new ImageIcon(getClass().getResource("/vermon/Logo.png")).getImage());
     }
-    
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -122,7 +115,11 @@ public class Inicio extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    /* El método ingresarUsuIniMouseClicked se encarga de leer los datos de entrada 
+    y crear un controlador y un injector para poder pasar la información leída con 
+    la finalidad de abrir la interfaz correspondiente
+    */
+    
     private void ingresarUsuIniMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ingresarUsuIniMouseClicked
         String userName= null;
         String passwordUser= null;
@@ -145,7 +142,6 @@ public class Inicio extends javax.swing.JFrame {
                     break;
                 case CAJERO :
                     this.dispose();
-                    //Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
                     new Cajero();
                     break;
                 case UKNOWN:
