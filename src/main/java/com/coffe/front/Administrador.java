@@ -2,6 +2,7 @@ package com.coffe.front;
 
 import com.coffee.back.ConfigureProductDI;
 import com.coffee.back.ConfigureUserDI;
+import com.coffee.back.commons.exception.NotFoundException;
 import com.coffee.back.controller.impl.ProductCtrlImpl;
 import com.coffee.back.controller.impl.UserCtrlImpl;
 import com.coffee.back.controller.vo.ProductVO;
@@ -16,6 +17,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -29,6 +31,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -36,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.table.DefaultTableModel;
@@ -58,7 +63,7 @@ public class Administrador extends javax.swing.JFrame {
     private String categoriaMOD; //Variable que contendrá la categoría del producto en modificar producto
     Toolkit t = Toolkit.getDefaultToolkit(); //Objeto que manejará propiedades de la pantalla
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //Objeto que almacenará el tamaño de la pantalla
-    JTable tabla = new JTable(); //Objeto que creará una tabla emergente
+     JTable tabla = new JTable(); //Objeto que creará una tabla emergente
 
     /*
     Éste método es un constructor que inicializa todas las variables utilizadas en la interfaz al crear una 
@@ -299,9 +304,27 @@ public class Administrador extends javax.swing.JFrame {
         jLabel16.setForeground(new java.awt.Color(0, 102, 102));
         jLabel16.setText("NOMBRE");
 
+        nombreUsuAL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                nombreUsuALKeyTyped(evt);
+            }
+        });
+
         jLabel19.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel19.setForeground(new java.awt.Color(0, 102, 102));
         jLabel19.setText("APELLIDO");
+
+        apellidoUsuAL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                apellidoUsuALKeyTyped(evt);
+            }
+        });
+
+        telefonoUsuAL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                telefonoUsuALKeyTyped(evt);
+            }
+        });
 
         jLabel20.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel20.setForeground(new java.awt.Color(0, 102, 102));
@@ -578,6 +601,12 @@ public class Administrador extends javax.swing.JFrame {
         jLabel9.setForeground(new java.awt.Color(0, 102, 102));
         jLabel9.setText("NOMBRE");
 
+        nombreUsuMOD.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                nombreUsuMODKeyTyped(evt);
+            }
+        });
+
         jLabel10.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(0, 102, 102));
         jLabel10.setText("APELLIDO");
@@ -765,6 +794,12 @@ public class Administrador extends javax.swing.JFrame {
         jLabel34.setForeground(new java.awt.Color(0, 102, 102));
         jLabel34.setText("CATEGORIA");
 
+        precioProdAL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                precioProdALKeyTyped(evt);
+            }
+        });
+
         imagenProdAL2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 102, 102)));
 
         guardarProdAL.setBackground(new java.awt.Color(6, 133, 135));
@@ -904,6 +939,12 @@ public class Administrador extends javax.swing.JFrame {
         jLabel39.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel39.setForeground(new java.awt.Color(0, 102, 102));
         jLabel39.setText("PRECIO");
+
+        precioProdMOD.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                precioProdMODKeyTyped(evt);
+            }
+        });
 
         jLabel40.setBackground(new java.awt.Color(0, 102, 102));
         jLabel40.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -1301,11 +1342,25 @@ public class Administrador extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancelarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuMODActionPerformed
-
+        nombreUsuMOD.setText("");
+        apellidoUsuMOD.setText("");
+        nickUsuMOD.setText("");
+        direccionUsuMOD.setText("");
+        telefonoUsuMOD.setText("");
+        emailUsuMOD.setText("");
+        passwordUsuMOD.setText("");
+        fotoUsuMOD2.setIcon(null);
     }//GEN-LAST:event_cancelarUsuMODActionPerformed
 
     private void cancelarUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuALActionPerformed
-        // TODO add your handling code here:
+        nombreUsuAL.setText("");
+        apellidoUsuAL.setText("");
+        nickUsuAL.setText("");
+        direccionUsuAL.setText("");
+        telefonoUsuAL.setText("");
+        emailUsuAL.setText("");
+        passwordUsuAL.setText("");
+        fotoUsuAL2.setIcon(null);
     }//GEN-LAST:event_cancelarUsuALActionPerformed
     /*Método que se encarga de limpiar los datos en pantalla al momento que el usuario
     de click en el botón cancelar
@@ -1324,80 +1379,177 @@ public class Administrador extends javax.swing.JFrame {
      */
     private void guardarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdALActionPerformed
         producto = new ProductVO();
-        Validar();
-        if(getValidarTerminado()){
-        String cantidadString = "";
-        //Inicia obtención de datos ingresados en la interfaz 
-        producto.setProductName(nombreProdAL.getText().toUpperCase());
-        cantidadString = valueOf(cantidadProdAL.getValue().toString());
-        Short cantidad = Short.parseShort(cantidadString);
-        producto.setQuantity(cantidad);
-        Double precio = Double.parseDouble(precioProdAL.getText());
-        producto.setPriceTag(precio);
-        producto.setCategoryName(getCategoria());
-        System.out.println("categoria: " + getCategoria());
-        producto.setImage(getDireccionImagen());
-        //Finaliza obtención de datos 
-        /*
+        validarProdAL();
+        if (getValidarTerminadoProdAL()) {
+            String cantidadString = "";
+            //Inicia obtención de datos ingresados en la interfaz 
+            producto.setProductName(nombreProdAL.getText().toUpperCase());
+            cantidadString = valueOf(cantidadProdAL.getValue().toString());
+            Short cantidad = Short.parseShort(cantidadString);
+            producto.setQuantity(cantidad);
+            Double precio = Double.parseDouble(precioProdAL.getText());
+            producto.setPriceTag(precio);
+            producto.setCategoryName(getCategoria());
+            System.out.println("categoria: " + getCategoria());
+            producto.setImage(getDireccionImagen());
+            //Finaliza obtención de datos 
+            /*
         Se establece un injector y controlador para producto
         Injector: se encargará de la comunicación de la base de datos con java
         Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
-         */
-        Injector injector = Guice.createInjector(new ConfigureProductDI());
-        ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-        String productRecover = productCtrl.altaProducto(producto);
-        JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
-        //Limpiamos los campos de la pantalla de alta producto
-        int valor = 0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
-        nombreProdAL.setText("");
-        cantidadProdAL.getModel().setValue(valor);
-        precioProdAL.setText("");
-        categoriaProdAL.setSelectedIndex(0);
-        imagenProdAL2.setIcon(null);
-        }else{
-            
+             */
+            Injector injector = Guice.createInjector(new ConfigureProductDI());
+            ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
+            String productRecover = productCtrl.altaProducto(producto);
+            JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
+            //Limpiamos los campos de la pantalla de alta producto
+            int valor = 0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
+            nombreProdAL.setText("");
+            cantidadProdAL.getModel().setValue(valor);
+            precioProdAL.setText("");
+            categoriaProdAL.setSelectedIndex(0);
+            imagenProdAL2.setIcon(null);
+        } else {
+
         }
-        
     }//GEN-LAST:event_guardarProdALActionPerformed
-    public void Validar(){
-         String cantidadString = "";
-        try{
-        if (!nombreProdAL.getText().isEmpty()) {
-            cantidadString = valueOf(cantidadProdAL.getValue().toString());
-            int cantidad = Integer.parseInt(cantidadString);
-            System.out.println("imagen-->"+imagenProdAL2.getIcon());
-            if (cantidad > 0) {
-                if(!precioProdAL.getText().isEmpty()){
-                    if(categoriaProdAL.getSelectedIndex()!=0){
-                        if(imagenProdAL2.getIcon()!=null){
-                            setValidarTerminado(true);
-                        }else{
-                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen","Mensaje de error",JOptionPane.ERROR_MESSAGE);
-                        }    
-                    }else{
-                        JOptionPane.showMessageDialog(null, "Seleccione una categoría","Mensaje de error",JOptionPane.ERROR_MESSAGE);
+//Empiezan métodos para validar que los campos de los formularios estén escritos correctamente y tengan los valores esperados
+    public void validarProdAL() {
+        String cantidadString = "";
+        try {
+            if (!nombreProdAL.getText().isEmpty()) {
+                cantidadString = valueOf(cantidadProdAL.getValue().toString());
+                int cantidad = Integer.parseInt(cantidadString);
+                if (cantidad > 0) {
+                    if (!precioProdAL.getText().isEmpty()) {
+                        if (categoriaProdAL.getSelectedIndex() != 0) {
+                            if (imagenProdAL2.getIcon() != null) {
+                                setValidarTerminadoProdAL(true);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Seleccione una categoría", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Ingrese un precio", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
                     }
-                }else{
-                    JOptionPane.showMessageDialog(null, "Ingrese un precio","Mensaje de error",JOptionPane.ERROR_MESSAGE);
-                }                
-                
-            }else{
-                JOptionPane.showMessageDialog(null, "La cantidad debe ser mayor a cero","Mensaje de error",JOptionPane.ERROR_MESSAGE);
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "La cantidad debe ser mayor a cero", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Por favor, ingrese nombre", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
             }
-        }else{
-            JOptionPane.showMessageDialog(null, "Por favor, ingrese nombre","Mensaje de error",JOptionPane.ERROR_MESSAGE);
-        }}
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-    boolean estadoDeValidacion=false;
-    public void setValidarTerminado(boolean aceptado){
-        estadoDeValidacion=true;
+    boolean estadoDeValidacionProdAL = false;
+
+    public void setValidarTerminadoProdAL(boolean aceptado) {
+        estadoDeValidacionProdAL = true;
     }
-    public boolean getValidarTerminado(){
-        return estadoDeValidacion;
+
+    public boolean getValidarTerminadoProdAL() {
+        return estadoDeValidacionProdAL;
     }
+
+    public void validarProdMOD() {
+        String cantidadString = "";
+        try {
+            System.out.println("Entro a pruebas");
+            if (!nombreProdMOD.getText().isEmpty()) {
+                cantidadString = valueOf(cantidadProdMOD.getValue().toString());
+                int cantidad = Integer.parseInt(cantidadString);
+                System.out.println("Aun no a precio");
+                if (cantidad > 0) {
+                    System.out.println("Llego a precio");
+                    if (!precioProdMOD.getText().isEmpty()) {
+                        System.out.println("Paso precio");
+                        if (categoriaProdMOD.getSelectedIndex() != 0) {
+                            if (imagenProdMOD2.getIcon() != null) {
+                                setValidarTerminadoProdMOD(true);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Seleccione una categoría", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Ingrese un precio", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "La cantidad debe ser mayor a cero", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Por favor, ingrese nombre", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    boolean estadoDeValidacionProdMOD = false;
+
+    public void setValidarTerminadoProdMOD(boolean aceptado) {
+        estadoDeValidacionProdMOD = true;
+    }
+
+    public boolean getValidarTerminadoProdMOD() {
+        return estadoDeValidacionProdMOD;
+    }
+
+    public void validarUsuAL() {
+        try {
+            if (!nombreUsuAL.getText().isEmpty()) {
+                if (!apellidoUsuAL.getText().isEmpty()) {
+                    if (!nickUsuAL.getText().isEmpty()) {
+                        if (!telefonoUsuAL.getText().isEmpty()) {
+                            if (!direccionUsuAL.getText().isEmpty()) {
+                                if (passwordUsuAL.getPassword().length > 0) {
+                                    if (!emailUsuAL.getText().isEmpty()) {
+                                        if (fotoUsuAL2.getIcon() != null) {
+                                            setValidarTerminadoUsuAL(true);
+                                        } else {
+                                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    } else {
+                                        JOptionPane.showMessageDialog(null, "Ingrese email", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                                    }
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Ingrese contraseña", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Ingrese dirección", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Ingrese teléfono", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Ingrese nick", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "ingrese apellido", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Ingrese nombre", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    boolean estadoDeValidacionUsuAL = false;
+
+    public void setValidarTerminadoUsuAL(boolean aceptado) {
+        estadoDeValidacionUsuAL = true;
+    }
+
+    public boolean getValidarTerminadoUsuAL() {
+        return estadoDeValidacionUsuAL;
+    }
+//Terminan métodos para validar que los campos de los formularios estén escritos correctamente y tengan los valores esperados
     private void imagenProd1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_imagenProd1MouseClicked
         fileChooser = new JFileChooser(); //Se declara una variable de tipo JFileChooser
         FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG", "jpg", "png"); //Se le especifica que tipo de archivo queremos que se nos muestre
@@ -1448,7 +1600,7 @@ public class Administrador extends javax.swing.JFrame {
     /*
     Método encargado de buscar un producto, y verificar qué producto fue selecionado
     y en base a eso mostrar los datos en pantalla para su modificación
-     */
+     */ 
     int variableID = 0;
     private void buscarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarProdMODActionPerformed
         productoo = new ArrayList<>(); //se crea un objeto de tipo ArrayList
@@ -1466,8 +1618,17 @@ public class Administrador extends javax.swing.JFrame {
         String cabeza[] = {"NOMBRE", "PRECIO"};
         DefaultTableModel tm = new DefaultTableModel(data, cabeza);
         JFrame vtn = new JFrame(); //Se crea un JFrame para el contenedor de la tabla de los productos a mostrar
+       
+       //Agregar scroll JScrollPane jScrollPane2=new JScrollPane();
         tabla.setModel(tm);
-        vtn.add(tabla);
+        //tabla.setPreferredScrollableViewportSize(new Dimension(450,60));
+        tabla.setFillsViewportHeight(true);
+        JScrollPane scrollPane = new JScrollPane(tabla); 
+
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); 
+        vtn.add(scrollPane);
+//vtn.add(tabla);
+
         vtn.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         vtn.setVisible(true);
         vtn.setBounds(screenSize.width / 4, screenSize.height / 4, 400, 200);
@@ -1552,35 +1713,38 @@ public class Administrador extends javax.swing.JFrame {
 
     //Método encargado de obtener los datos de los ingresados por el usuario para la creación de un usuario
     private void guardarUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarUsuALActionPerformed
-        //Empieza la obtención de los datos ingresados en el formulario
-        String passwordUsuario = "";
-        trabajador = new WorkerVO();
-        usuario = new UserVO();
-        trabajador.setName(nombreUsuAL.getText());
-        usuario.setUserName(nickUsuAL.getText());
-        trabajador.setAddress(direccionUsuAL.getText());
-        passwordUsuario = String.copyValueOf(passwordUsuAL.getPassword());
-        usuario.setPassword(passwordUsuario);
-        trabajador.setLastName(apellidoUsuAL.getText());
-        trabajador.setPhoneNumber(telefonoUsuAL.getText());
-        trabajador.setEmail(emailUsuAL.getText());
-        trabajador.setPhoto(getDireccionImagen());
-        trabajador.setUserVO(usuario);
-        //Finaliza la obtención de los datos 
-        //Se establece un injector y controlador para usuario
-        Injector injector = Guice.createInjector(new ConfigureUserDI());
-        UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
-        String userRecover = userCtrl.altaUsuario(trabajador);
-        JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
-        //Limpiamos los campos de la pantalla de alta producto
-        nombreUsuAL.setText("");
-        nickUsuAL.setText("");
-        direccionUsuAL.setText("");
-        apellidoUsuAL.setText("");
-        telefonoUsuAL.setText("");
-        emailUsuAL.setText("");
-        passwordUsuAL.setText("");
-        fotoUsuAL2.setIcon(null);
+        validarUsuAL();
+        if (getValidarTerminadoUsuAL()) {
+            //Empieza la obtención de los datos ingresados en el formulario
+            String passwordUsuario = "";
+            trabajador = new WorkerVO();
+            usuario = new UserVO();
+            trabajador.setName(nombreUsuAL.getText().toUpperCase());
+            usuario.setUserName(nickUsuAL.getText().toUpperCase());
+            trabajador.setAddress(direccionUsuAL.getText());
+            passwordUsuario = String.copyValueOf(passwordUsuAL.getPassword());
+            usuario.setPassword(passwordUsuario);
+            trabajador.setLastName(apellidoUsuAL.getText().toUpperCase());
+            trabajador.setPhoneNumber(telefonoUsuAL.getText());
+            trabajador.setEmail(emailUsuAL.getText());
+            trabajador.setPhoto(getDireccionImagen());
+            trabajador.setUserVO(usuario);
+            //Finaliza la obtención de los datos 
+            //Se establece un injector y controlador para usuario
+            Injector injector = Guice.createInjector(new ConfigureUserDI());
+            UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
+            String userRecover = userCtrl.altaUsuario(trabajador);
+            JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
+            //Limpiamos los campos de la pantalla de alta producto
+            nombreUsuAL.setText("");
+            nickUsuAL.setText("");
+            direccionUsuAL.setText("");
+            apellidoUsuAL.setText("");
+            telefonoUsuAL.setText("");
+            emailUsuAL.setText("");
+            passwordUsuAL.setText("");
+            fotoUsuAL2.setIcon(null);
+        }
     }//GEN-LAST:event_guardarUsuALActionPerformed
 
     private void fotoUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fotoUsuALActionPerformed
@@ -1623,6 +1787,7 @@ public class Administrador extends javax.swing.JFrame {
         String cantidadArray;
         String precioArray;
         String categoriaArray;
+        
         // Ciclo que obtiene los atributos de los productos    
         while (productoIterador.hasNext()) {
             ProductVO productoCiclo = productoIterador.next();
@@ -1649,13 +1814,30 @@ public class Administrador extends javax.swing.JFrame {
     }//GEN-LAST:event_aceptarProdCONActionPerformed
 
     private void buscarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarUsuMODActionPerformed
-        String nombreUsuarioMod = nombreUsuMOD.getText();
-        Injector injector = Guice.createInjector(new ConfigureUserDI());
-        UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
-        //Cambiar por modificar usuario
-        String userRecover = userCtrl.altaUsuario(trabajador);
-        JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
+        trabajador = new WorkerVO();
+        boolean validacionWorker = false;
+        String nombreUsuarioMod = nombreUsuMOD.getText().toUpperCase();
+        if (nombreUsuMOD.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Ingrese un nombre", "ERROR", JOptionPane.ERROR_MESSAGE);
+        } else {
+            Injector injector = Guice.createInjector(new ConfigureUserDI());
+            UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
+            try {
+                //Cambiar por modificar usuario
+                trabajador = userCtrl.buscarUsuario(nombreUsuarioMod);
+                nombreUsuMOD.setText(trabajador.getName());
+                nickUsuMOD.setText(trabajador.getUserVO().getUserName());
+                apellidoUsuMOD.setText(trabajador.getLastName());
+                telefonoUsuMOD.setText(trabajador.getPhoneNumber());
+                direccionUsuMOD.setText(trabajador.getAddress());
+                passwordUsuMOD.setText(trabajador.getUserVO().getPassword());
+                emailUsuMOD.setText(trabajador.getEmail());
+            } catch (NotFoundException ex) {
+                JOptionPane.showMessageDialog(null, "Usuario no encontrado");
+                System.out.println(ex.getMessage());
+            }
 
+        }
     }//GEN-LAST:event_buscarUsuMODActionPerformed
 
     private void cerrarSesionVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarSesionVentasActionPerformed
@@ -1690,35 +1872,41 @@ public class Administrador extends javax.swing.JFrame {
 
     private void guardarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdMODActionPerformed
         producto = new ProductVO();
+        validarProdMOD();
         //Inicia obtención de datos ingresados en la interfaz
-        producto.setId(getIdProducto());
-        producto.setProductName(nombreProdMOD.getText().toUpperCase());
-        String cantidadString = valueOf(cantidadProdMOD.getValue().toString());
-        Short cantidad = Short.parseShort(cantidadString);
-        producto.setQuantity(cantidad);
-        Double precio = Double.parseDouble(precioProdMOD.getText());
-        producto.setPriceTag(precio);
-        producto.setCategoryName(getCategoria());
-        producto.setImage(getDireccionImagen());
-        //Id productoo.
-        //Finaliza obtención de datos 
-        /*
+        if (getValidarTerminadoProdMOD()) {
+            producto.setId(getIdProducto());
+            producto.setProductName(nombreProdMOD.getText().toUpperCase());
+            String cantidadString = valueOf(cantidadProdMOD.getValue().toString());
+            Short cantidad = Short.parseShort(cantidadString);
+            producto.setQuantity(cantidad);
+            Double precio = Double.parseDouble(precioProdMOD.getText());
+            producto.setPriceTag(precio);
+            producto.setCategoryName(getCategoria());
+            producto.setImage(getDireccionImagen());
+            //Id productoo.
+            //Finaliza obtención de datos 
+            /*
         Se establece un injector y controlador para producto
         Injector: se encargará de la comunicación de la base de datos con java
         Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
-         */
-        Injector injector = Guice.createInjector(new ConfigureProductDI());
-        ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-        String productRecover = productCtrl.modificarProducto(producto);
-        JOptionPane.showMessageDialog(this, productRecover, "--Estado--:", JOptionPane.INFORMATION_MESSAGE);
-        //Limpiamos los campos de la pantalla de alta producto
-        /*  int valor=0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
+             */
+            Injector injector = Guice.createInjector(new ConfigureProductDI());
+            ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
+            String productRecover = productCtrl.modificarProducto(producto);
+            JOptionPane.showMessageDialog(this, productRecover, "--Estado--:", JOptionPane.INFORMATION_MESSAGE);
+            //Limpiamos los campos de la pantalla de alta producto
+            /*  int valor=0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
         nombreProdMOD.setText("");
         cantidadProdMOD.getModel().setValue(valor);
         precioProdMOD.setText("");
         categoriaProdMOD.setSelectedIndex(0);
         imagenProdMOD2.setIcon(null);
-         */
+             */
+        } else {
+
+        }
+
     }//GEN-LAST:event_guardarProdMODActionPerformed
 
     private void categoriaProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoriaProdMODActionPerformed
@@ -1766,8 +1954,63 @@ public class Administrador extends javax.swing.JFrame {
     }//GEN-LAST:event_nickUsuMODActionPerformed
 
     private void cancelarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdMODActionPerformed
-
+        //Limpiamos los campos de la pantalla de alta producto
+        int valor = 0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
+        nombreProdMOD.setText("");
+        cantidadProdMOD.getModel().setValue(valor);
+        precioProdMOD.setText("");
+        categoriaProdMOD.setSelectedIndex(0);
+        imagenProdMOD2.setIcon(null);
     }//GEN-LAST:event_cancelarProdMODActionPerformed
+
+    private void precioProdALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_precioProdALKeyTyped
+        if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyChar() != '.') {
+            evt.consume();
+        }
+        if (evt.getKeyChar() == '.' && precioProdAL.getText().contains(".")) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_precioProdALKeyTyped
+
+    private void nombreUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nombreUsuALKeyTyped
+        char tecla = evt.getKeyChar();
+        if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_nombreUsuALKeyTyped
+
+    private void apellidoUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_apellidoUsuALKeyTyped
+        char tecla = evt.getKeyChar();
+        if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_apellidoUsuALKeyTyped
+
+    private void precioProdMODKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_precioProdMODKeyTyped
+        if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyChar() != '.') {
+            evt.consume();
+        }
+        if (evt.getKeyChar() == '.' && precioProdMOD.getText().contains(".")) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_precioProdMODKeyTyped
+
+    private void telefonoUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_telefonoUsuALKeyTyped
+        char tecla = evt.getKeyChar();
+        if (telefonoUsuAL.getText().length() == 10) {
+            evt.consume();
+        }
+        if (!Character.isDigit(tecla) && tecla != KeyEvent.VK_BACK_SPACE) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_telefonoUsuALKeyTyped
+
+    private void nombreUsuMODKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nombreUsuMODKeyTyped
+        char tecla = evt.getKeyChar();
+        if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_nombreUsuMODKeyTyped
 
     private String getCategoria() {
         return categoria;

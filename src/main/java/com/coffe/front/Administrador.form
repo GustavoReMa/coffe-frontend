@@ -415,6 +415,9 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="nombreUsuAL">
+                      <Events>
+                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="nombreUsuALKeyTyped"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel19">
                       <Properties>
@@ -428,8 +431,14 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="apellidoUsuAL">
+                      <Events>
+                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="apellidoUsuALKeyTyped"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JTextField" name="telefonoUsuAL">
+                      <Events>
+                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="telefonoUsuALKeyTyped"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel20">
                       <Properties>
@@ -967,6 +976,9 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="nombreUsuMOD">
+                      <Events>
+                        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="nombreUsuMODKeyTyped"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel10">
                       <Properties>
@@ -1333,6 +1345,9 @@
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JTextField" name="precioProdAL">
+                          <Events>
+                            <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="precioProdALKeyTyped"/>
+                          </Events>
                         </Component>
                         <Component class="javax.swing.JLabel" name="imagenProdAL2">
                           <Properties>
@@ -1572,6 +1587,9 @@
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JTextField" name="precioProdMOD">
+                          <Events>
+                            <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="precioProdMODKeyTyped"/>
+                          </Events>
                         </Component>
                         <Component class="javax.swing.JLabel" name="jLabel40">
                           <Properties>

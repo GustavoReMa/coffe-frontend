@@ -46,7 +46,7 @@ public class Inicio extends javax.swing.JFrame {
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/coffe/front/assets/usuario.PNG"))); // NOI18N
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        nickUsuIni.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "NOMBRE", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Verdana", 0, 12), new java.awt.Color(0, 153, 153))); // NOI18N
+        nickUsuIni.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "NICK", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Verdana", 0, 12), new java.awt.Color(0, 153, 153))); // NOI18N
         nickUsuIni.setDisabledTextColor(new java.awt.Color(255, 255, 51));
 
         passUsuIni.setToolTipText("");
@@ -101,6 +101,8 @@ public class Inicio extends javax.swing.JFrame {
                 .addComponent(ingresarUsuIni, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        nickUsuIni.getAccessibleContext().setAccessibleName("NICK");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

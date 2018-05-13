@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ce99c51f-1e09-40a8-8634-b14c03e04de7">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[select worker_name,date_sale,amount 
+from sale natural join worker]]>
+	</queryString>
+	<field name="worker_name" class="java.lang.String"/>
+	<field name="date_sale" class="java.sql.Timestamp"/>
+	<field name="amount" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="72" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="223" height="41" uuid="f07b8140-fda4-4d1e-9558-1c1228fa4799"/>
+				<imageExpression><![CDATA["C:\\Users\\GUSTAVO\\Documents\\NetBeansProjects\\vermon2\\src\\main\\resources\\com\\coffe\\front\\assets\\Logotipo.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="120" y="50" width="316" height="20" uuid="35e1d1ae-f471-4a79-a9ee-9f1e77521af4"/>
+				<textElement>
+					<font fontName="Monospaced" size="12"/>
+				</textElement>
+				<text><![CDATA[CAFETRÍA BÚHOS S.A. DE C.V. ORIENTE 9 #234  ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="55" splitType="Stretch">
+			<staticText>
+				<reportElement x="149" y="20" width="265" height="30" uuid="4c40cd7a-f55d-4361-8522-effa90f0d3f2"/>
+				<textElement textAlignment="Center">
+					<font fontName="Aparajita" size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE DE VENTAS ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="191" y="0" width="174" height="20" uuid="74ef98c7-189a-4374-9f06-5158b66a7dae"/>
+				<textElement>
+					<font fontName="Monospaced" size="12"/>
+				</textElement>
+				<text><![CDATA["ALIMENTANDO EL FUTURO"]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="38" splitType="Stretch">
+			<staticText>
+				<reportElement x="49" y="2" width="100" height="20" uuid="98955863-1b32-49a4-9e2d-c24eb59b0b4c"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<text><![CDATA[NOMBRE CAJERO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="223" y="2" width="100" height="20" uuid="981af2cc-8fab-4f3b-8cab-4175d6ba75e4"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<text><![CDATA[FECHA DE VENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="390" y="2" width="100" height="20" uuid="dec3226a-3ab8-43a1-a3b0-3ad30a6c510b"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<text><![CDATA[MONTO]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<textField>
+				<reportElement x="49" y="6" width="100" height="20" uuid="559eaabc-274b-4507-a75f-10cecae16db6"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{worker_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="6" width="100" height="20" uuid="6cb71c2c-2457-4974-abb6-eb7beb7f1925"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date_sale}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="390" y="6" width="100" height="20" uuid="b2318637-eb1b-4594-9d6d-99f08b2688c6"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="70" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

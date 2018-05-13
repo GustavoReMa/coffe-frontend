@@ -114,7 +114,7 @@
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                <TitledBorder title="NOMBRE">
+                <TitledBorder title="NICK">
                   <Font PropertyName="font" name="Verdana" size="12" style="0"/>
                   <Color PropertyName="color" blue="99" green="99" red="0" type="rgb"/>
                 </TitledBorder>
@@ -124,6 +124,9 @@
               <Color blue="33" green="ff" red="ff" type="rgb"/>
             </Property>
           </Properties>
+          <AccessibilityProperties>
+            <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="NICK"/>
+          </AccessibilityProperties>
         </Component>
         <Component class="javax.swing.JPasswordField" name="passUsuIni">
           <Properties>
