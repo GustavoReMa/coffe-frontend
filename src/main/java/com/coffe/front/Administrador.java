@@ -6,9 +6,7 @@ import com.coffee.back.ConfigureSaleDI;
 import com.coffee.back.ConfigureUserDI;
 import com.coffee.back.commons.enums.UserType;
 import com.coffee.back.commons.exception.NotFoundException;
-import com.coffee.back.controller.Report;
 import com.coffee.back.controller.impl.ProductCtrlImpl;
-import com.coffee.back.controller.impl.ReportImpl;
 import com.coffee.back.controller.impl.UserCtrlImpl;
 import com.coffee.back.controller.vo.ProductVO;
 import com.coffee.back.controller.vo.UserVO;
@@ -74,8 +72,8 @@ public class Administrador extends javax.swing.JFrame {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //Objeto que almacenará el tamaño de la pantalla
     JTable tabla = new JTable(); //Objeto que creará una tabla emergente
     GenerarReportes gr = new GenerarReportes();
-    String dirImagenesGlobal[],nombreProdGlobal[];
-    int contadorProdEliminar = 0,contadorProdBa=0;
+    String dirImagenesGlobal[], nombreProdGlobal[];
+    int contadorProdEliminar = 0, contadorProdBa = 0;
     int indiceProductoEliminar = 0, indiceProductoEliminar2 = 0, indiceProductoEliminar3 = 0, indiceProductoEliminar4 = 0,
             indiceProductoEliminar5 = 0, indiceProductoEliminar6 = 0;
 
@@ -88,7 +86,7 @@ public class Administrador extends javax.swing.JFrame {
         realizarReporteVentas.setEnabled(false);
         bloquearCamposProd();
         inicializarProductoEliminar();
-        
+
     }
 
     private void inicializarProductoEliminar() {
@@ -173,7 +171,7 @@ public class Administrador extends javax.swing.JFrame {
             if (contadorProdEliminar > 0) {
                 int indiceModulo = direcciones.length;
                 if (modulo == 1) {
-                    indiceModulo=indiceModulo-1;
+                    indiceModulo = indiceModulo - 1;
                     pintarImagen(direcciones[indiceModulo], contEliminarProd1);
                     setIndiceProductoEliminar(indiceModulo);
                     contEliminarProd2.setIcon(null);
@@ -1747,7 +1745,7 @@ public class Administrador extends javax.swing.JFrame {
      */
     private void guardarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdALActionPerformed
         producto = new ProductVO();
-        validarProducto(nombreProdAL,cantidadProdAL,precioProdAL,categoriaProdAL,imagenProdAL2);
+        validarProducto(nombreProdAL, cantidadProdAL, precioProdAL, categoriaProdAL, imagenProdAL2);
         if (getValidarTerminadoProducto()) {
             String cantidadString = "";
             //Inicia obtención de datos ingresados en la interfaz 
@@ -1786,23 +1784,35 @@ public class Administrador extends javax.swing.JFrame {
             if (!nombre.getText().isEmpty()) {
                 cantidadString = valueOf(cantidad.getValue().toString());
                 int canti = Integer.parseInt(cantidadString);
-                if (canti > 0) {
-                    if (!precio.getText().isEmpty()) {
-                        if (categoria.getSelectedIndex() != 0) {
+                if (categoria.getSelectedIndex() != 0) {
+                    if (categoria.getSelectedIndex() == 2) {
+                        categoriaCantidad(cantidad);
+                        if (!precio.getText().isEmpty()) {
                             if (imagen.getIcon() != null) {
                                 setValidarProductoTerminado(true);
                             } else {
                                 JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
                             }
                         } else {
-                            JOptionPane.showMessageDialog(null, "Seleccione una categoría", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Ingrese un precio", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "Ingrese un precio", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                        if (!precio.getText().isEmpty()) {
+                            if (canti > 0) {
+                                if (imagen.getIcon() != null) {
+                                    setValidarProductoTerminado(true);
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una imagen", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "La cantidad debe ser mayor a cero", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Ingrese un precio", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
-
                 } else {
-                    JOptionPane.showMessageDialog(null, "La cantidad debe ser mayor a cero", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Seleccione una categoría", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Por favor, ingrese nombre", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
@@ -1812,6 +1822,7 @@ public class Administrador extends javax.swing.JFrame {
         }
     }
     boolean estadoDeValidacionProd = false;
+
     public void setValidarProductoTerminado(boolean aceptado) {
         estadoDeValidacionProd = true;
     }
@@ -1881,27 +1892,24 @@ public class Administrador extends javax.swing.JFrame {
         switch (combo.getSelectedIndex()) { //Se obtiene el índice de la selección del comboBox
             case 1:
                 categoria = "COMIDA RAPIDA";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 2:
                 categoria = "COMIDA";
-                System.out.println(combo.getSelectedIndex());
+                categoriaCantidad(cantidadProdAL);
                 break;
             case 3:
                 categoria = "BEBIDA";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 4:
                 categoria = "SNACK";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 5:
                 categoria = "BREAD";
-                System.out.println(combo.getSelectedIndex());
-            default:
-                System.out.println("Selecciona una categoría");
         }
     }//GEN-LAST:event_categoriaProdALActionPerformed
+   private void categoriaCantidad(JSpinner cantidad){
+       cantidad.getModel().setValue(0);
+   }
     /*
     Método encargado de buscar un producto, y verificar qué producto fue selecionado
     y en base a eso mostrar los datos en pantalla para su modificación
@@ -1935,7 +1943,7 @@ public class Administrador extends javax.swing.JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                            desbloquearCamposProd();
+                    desbloquearCamposProd();
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
                     //Empieza la obtención de los datos del producto que se busco
@@ -2165,34 +2173,34 @@ public class Administrador extends javax.swing.JFrame {
 
     private void guardarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdMODActionPerformed
         producto = new ProductVO();
-        validarProducto(nombreProdMOD,cantidadProdMOD,precioProdMOD,categoriaProdMOD,imagenProdMOD2);
+        validarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
         //Inicia obtención de datos ingresados en la interfaz
         if (getValidarTerminadoProducto()) {
-                    System.out.println("-------" + getIdProducto() + "------");
-                    producto.setId(getIdProducto());
-                    producto.setProductName(nombreProdMOD.getText().toUpperCase());
-                    String cantidadString = valueOf(cantidadProdMOD.getValue().toString());
-                    Short cantidad = Short.parseShort(cantidadString);
-                    producto.setQuantity(cantidad);
-                    Double precio = Double.parseDouble(precioProdMOD.getText());
-                    producto.setPriceTag(precio);
-                    producto.setCategoryName(getCategoria());
-                    System.out.println("siguiendo imagen: "+getDireccionImagen());
-                    producto.setImage(getDireccionImagen());
-                    //Finaliza obtención de datos 
-                    /*
+            System.out.println("-------" + getIdProducto() + "------");
+            producto.setId(getIdProducto());
+            producto.setProductName(nombreProdMOD.getText().toUpperCase());
+            String cantidadString = valueOf(cantidadProdMOD.getValue().toString());
+            Short cantidad = Short.parseShort(cantidadString);
+            producto.setQuantity(cantidad);
+            Double precio = Double.parseDouble(precioProdMOD.getText());
+            producto.setPriceTag(precio);
+            producto.setCategoryName(getCategoria());
+            System.out.println("siguiendo imagen: " + getDireccionImagen());
+            producto.setImage(getDireccionImagen());
+            //Finaliza obtención de datos 
+            /*
         Se establece un injector y controlador para producto
         Injector: se encargará de la comunicación de la base de datos con java
         Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
-                     */
-                    Injector injector = Guice.createInjector(new ConfigureProductDI());
-                    ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
-                    String productRecover = productCtrl.modificarProducto(producto);
-                    JOptionPane.showMessageDialog(this, productRecover, "--Estado--: ", JOptionPane.INFORMATION_MESSAGE);
-                    //Limpiamos los campos de la pantalla de modificar producto producto
-                    limpiarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
-                    bloquearCamposProd();
-                    inicializarProductoEliminar();
+             */
+            Injector injector = Guice.createInjector(new ConfigureProductDI());
+            ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
+            String productRecover = productCtrl.modificarProducto(producto);
+            JOptionPane.showMessageDialog(this, productRecover, "--Estado--: ", JOptionPane.INFORMATION_MESSAGE);
+            //Limpiamos los campos de la pantalla de modificar producto producto
+            limpiarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
+            bloquearCamposProd();
+            inicializarProductoEliminar();
         }
 
     }//GEN-LAST:event_guardarProdMODActionPerformed
@@ -2208,26 +2216,22 @@ public class Administrador extends javax.swing.JFrame {
         switch (combo.getSelectedIndex()) { //Se obtiene el índice de la selección del comboBox
             case 1:
                 categoria = "COMIDA RAPIDA";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 2:
                 categoria = "COMIDA";
-                System.out.println(combo.getSelectedIndex());
+                categoriaCantidad(cantidadProdMOD);
                 break;
             case 3:
                 categoria = "BEBIDA";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 4:
                 categoria = "SNACK";
-                System.out.println(combo.getSelectedIndex());
                 break;
             case 5:
                 categoria = "BREAD";
-                System.out.println(combo.getSelectedIndex());
         }
     }//GEN-LAST:event_categoriaProdMODActionPerformed
-
+    
     private void imagenProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imagenProdMODActionPerformed
         escogerImagen(imagenProdMOD2);
     }//GEN-LAST:event_imagenProdMODActionPerformed
@@ -2262,16 +2266,17 @@ public class Administrador extends javax.swing.JFrame {
     private void cancelarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdMODActionPerformed
         //Limpiamos los campos de la pantalla de alta producto
         limpiarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
-        bloquearCamposProd(); 
+        bloquearCamposProd();
     }//GEN-LAST:event_cancelarProdMODActionPerformed
-    private void bloquearCamposProd(){
+    private void bloquearCamposProd() {
         cantidadProdMOD.setEnabled(false);
         precioProdMOD.setEnabled(false);
         imagenProdMOD.setEnabled(false);
         precioProdMOD.setEnabled(false);
-        categoriaProdMOD.setEnabled(false);   
+        categoriaProdMOD.setEnabled(false);
     }
-    private void desbloquearCamposProd(){
+
+    private void desbloquearCamposProd() {
         cantidadProdMOD.setEnabled(true);
         precioProdMOD.setEnabled(true);
         imagenProdMOD.setEnabled(true);
@@ -2395,7 +2400,7 @@ public class Administrador extends javax.swing.JFrame {
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
-                    System.out.println("inidice en eliminar "+indice);
+                    System.out.println("inidice en eliminar " + indice);
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
                     //Empieza la obtención de los datos del producto que se busco
                     idProductoGlobal = productoo.get(indice).getId();
@@ -2421,8 +2426,8 @@ public class Administrador extends javax.swing.JFrame {
         });
         /*Ciclo encargado de obtener los datos de los productos que coinciden con el nombre del que desea buscarse
         y los agrega al modelo de la tabla
-         */ 
-        while (productoIterador.hasNext()) { 
+         */
+        while (productoIterador.hasNext()) {
             ProductVO productoCiclo = productoIterador.next();
             String nombreArray = productoCiclo.getProductName();
             String precioArray = productoCiclo.getPriceTag().toString();
@@ -2430,14 +2435,14 @@ public class Administrador extends javax.swing.JFrame {
             tm.addRow(datos);
         }
     }//GEN-LAST:event_buscarProdBAActionPerformed
-private void eliminarProd(int posicion){
+    private void eliminarProd(int posicion) {
         String nombreEliminar = nombreProdGlobal[posicion];
         Injector injector = Guice.createInjector(new ConfigureProductDI());
         ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
         String productRecover = productCtrl.bajaProducto(nombreEliminar);
         JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
         System.out.println("TERMINADO BAJA PRODUCTO");
-}
+    }
     private void eliminarUsuario1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_eliminarUsuario1ActionPerformed
         Injector injector = Guice.createInjector(new ConfigureUserDI());
         UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
@@ -2447,40 +2452,40 @@ private void eliminarProd(int posicion){
 
     private void opcionEliminarProd1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd1ActionPerformed
         System.out.println(getIndiceProductoEliminar() + " : " + dirImagenesGlobal[getIndiceProductoEliminar()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar()]);
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar()]);
         confirmacionEliminarProd(getIndiceProductoEliminar());
     }//GEN-LAST:event_opcionEliminarProd1ActionPerformed
 
     private void opcionEliminarProd2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd2ActionPerformed
         System.out.println(getIndiceProductoEliminar2() + " : " + dirImagenesGlobal[getIndiceProductoEliminar2()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar2()]);
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar2()]);
         confirmacionEliminarProd(getIndiceProductoEliminar2());
     }//GEN-LAST:event_opcionEliminarProd2ActionPerformed
 
     private void opcionEliminarProd3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd3ActionPerformed
         System.out.println(getIndiceProductoEliminar3() + " : " + dirImagenesGlobal[getIndiceProductoEliminar3()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar3()]);
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar3()]);
         confirmacionEliminarProd(getIndiceProductoEliminar3());
     }//GEN-LAST:event_opcionEliminarProd3ActionPerformed
 
     private void opcionEliminarProd4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd4ActionPerformed
         System.out.println(getIndiceProductoEliminar4() + " : " + dirImagenesGlobal[getIndiceProductoEliminar4()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar4()]);
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar4()]);
         confirmacionEliminarProd(getIndiceProductoEliminar4());
     }//GEN-LAST:event_opcionEliminarProd4ActionPerformed
 
     private void opcionEliminarProd5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd5ActionPerformed
-       System.out.println(getIndiceProductoEliminar5() + " : " + dirImagenesGlobal[getIndiceProductoEliminar5()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar5()]);
-       confirmacionEliminarProd(getIndiceProductoEliminar5());
+        System.out.println(getIndiceProductoEliminar5() + " : " + dirImagenesGlobal[getIndiceProductoEliminar5()]
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar5()]);
+        confirmacionEliminarProd(getIndiceProductoEliminar5());
     }//GEN-LAST:event_opcionEliminarProd5ActionPerformed
 
     private void opcionEliminarProd6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd6ActionPerformed
         System.out.println(getIndiceProductoEliminar6() + " : " + dirImagenesGlobal[getIndiceProductoEliminar6()]
-        +" nombre: "+nombreProdGlobal[getIndiceProductoEliminar6()]);
+                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar6()]);
         confirmacionEliminarProd(getIndiceProductoEliminar6());
     }//GEN-LAST:event_opcionEliminarProd6ActionPerformed
-    private void confirmacionEliminarProd(int indice){
+    private void confirmacionEliminarProd(int indice) {
         JFrame contenedor = new JFrame();
         contenedor.setBounds(screenSize.width / 4, screenSize.height / 4, 220, 100);
         contenedor.setVisible(true);
@@ -2518,9 +2523,6 @@ private void eliminarProd(int posicion){
     }//GEN-LAST:event_buscarUsuarioBajaActionPerformed
 
     private void graficaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_graficaActionPerformed
-        ReportImpl report = new ReportImpl();
-        report.realizar("2018-02-01", "2018-03-01");
-
 
     }//GEN-LAST:event_graficaActionPerformed
 
