@@ -3,9 +3,16 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
+	<parameter name="fecha_inicio" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
-		<![CDATA[select worker_name,date_sale,amount 
-from sale natural join worker]]>
+		<![CDATA[select worker_name,date_sale,amount
+from sale natural join worker
+where date_sale BETWEEN $P{fecha_inicio}::DATE AND $P{fecha_fin}::DATE]]>
 	</queryString>
 	<field name="worker_name" class="java.lang.String"/>
 	<field name="date_sale" class="java.sql.Timestamp"/>
@@ -16,7 +23,7 @@ from sale natural join worker]]>
 	<title>
 		<band height="72" splitType="Stretch">
 			<image>
-				<reportElement x="0" y="0" width="223" height="41" uuid="f07b8140-fda4-4d1e-9558-1c1228fa4799"/>
+				<reportElement x="10" y="9" width="223" height="41" uuid="f07b8140-fda4-4d1e-9558-1c1228fa4799"/>
 				<imageExpression><![CDATA["C:\\Users\\GUSTAVO\\Documents\\NetBeansProjects\\vermon2\\src\\main\\resources\\com\\coffe\\front\\assets\\Logotipo.png"]]></imageExpression>
 			</image>
 			<staticText>
@@ -49,13 +56,6 @@ from sale natural join worker]]>
 	<columnHeader>
 		<band height="38" splitType="Stretch">
 			<staticText>
-				<reportElement x="49" y="2" width="100" height="20" uuid="98955863-1b32-49a4-9e2d-c24eb59b0b4c"/>
-				<textElement textAlignment="Center">
-					<font fontName="Monospaced"/>
-				</textElement>
-				<text><![CDATA[NOMBRE CAJERO]]></text>
-			</staticText>
-			<staticText>
 				<reportElement x="223" y="2" width="100" height="20" uuid="981af2cc-8fab-4f3b-8cab-4175d6ba75e4"/>
 				<textElement textAlignment="Center">
 					<font fontName="Monospaced"/>
@@ -69,17 +69,17 @@ from sale natural join worker]]>
 				</textElement>
 				<text><![CDATA[MONTO]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="32" y="2" width="130" height="20" uuid="978b426a-e6ac-4095-ac90-decd39b6f42e"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<text><![CDATA[NOMBRE DE EMPLEADO]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="40" splitType="Stretch">
-			<textField>
-				<reportElement x="49" y="6" width="100" height="20" uuid="559eaabc-274b-4507-a75f-10cecae16db6"/>
-				<textElement textAlignment="Center">
-					<font fontName="Monospaced"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{worker_name}]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="223" y="6" width="100" height="20" uuid="6cb71c2c-2457-4974-abb6-eb7beb7f1925"/>
 				<textElement textAlignment="Center">
@@ -93,6 +93,13 @@ from sale natural join worker]]>
 					<font fontName="Monospaced"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="49" y="6" width="100" height="20" uuid="30a3a120-888d-4ed8-8e54-48a8c3431709"/>
+				<textElement>
+					<font fontName="Monospaced"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{worker_name}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
