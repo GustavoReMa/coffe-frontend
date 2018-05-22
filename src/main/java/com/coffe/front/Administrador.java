@@ -68,7 +68,6 @@ public class Administrador extends javax.swing.JFrame {
     private WorkerVO trabajador; //Objeto que contendrá los atributos de un trabajador (usuario)
     private List<WorkerVO> workerList;
     private UserVO usuario; //Objeto que contendrá el nick del usuario y su contraseña
-    private List<UserVO> userList;
     private String categoria; //Variable que contendrá la categoría del producto en alta producto
     private String categoriaMOD; //Variable que contendrá la categoría del producto en modificar producto
     Toolkit t = Toolkit.getDefaultToolkit(); //Objeto que manejará propiedades de la pantalla
@@ -132,7 +131,6 @@ public class Administrador extends javax.swing.JFrame {
     }
 
     public void pintarImagenProducto(String[] direcciones) {
-        int contadorPosicion = 0;
         int capacidad = direcciones.length / 6;
         int modulo = direcciones.length % 6;
         int indiceNumero = (contadorProdEliminar * 6) - 6;
@@ -1698,7 +1696,6 @@ public class Administrador extends javax.swing.JFrame {
             String productRecover = productCtrl.altaProducto(producto);
             JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
             //Limpiamos los campos de la pantalla de alta producto
-            int valor = 0; //variable para indicar el valor 0 en el atributo cantidad de alta producto
             limpiarProducto(nombreProdAL, cantidadProdAL, precioProdAL, categoriaProdAL, imagenProdAL2);
             inicializarProductoEliminar();
         } else {
@@ -2305,26 +2302,26 @@ public class Administrador extends javax.swing.JFrame {
     SimpleDateFormat sdf;
     String fechaInicio = "";
     private void jDateChooser1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser1PropertyChange
-        if (condate == 0) {
-        } else {
-            String formato = jDateChooser1.getDateFormatString();
-            Date date = jDateChooser1.getDate();
-            sdf = new SimpleDateFormat(formato);
-            fechaInicio = String.valueOf(sdf.format(date));
-        }
-        condate++;
+//        if (condate == 0) {
+//        } else {
+//            String formato = jDateChooser1.getDateFormatString();
+//            Date date = jDateChooser1.getDate();
+//            sdf = new SimpleDateFormat(formato);
+//            fechaInicio = String.valueOf(sdf.format(date));
+//        }
+//        condate++;
     }//GEN-LAST:event_jDateChooser1PropertyChange
     int condate2 = 0;
     String fechaFin = "";
     private void jDateChooser2PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser2PropertyChange
-        if (condate2 == 0) {
-        } else {
-            realizarReporteVentas.setEnabled(true);
-            String formatoo = jDateChooser2.getDateFormatString();
-            Date datee = jDateChooser2.getDate();
-            fechaFin = String.valueOf(sdf.format(datee));
-        }
-        condate2++;
+//        if (condate2 == 0) {
+//        } else {
+//            realizarReporteVentas.setEnabled(true);
+//            String formatoo = jDateChooser2.getDateFormatString();
+//            Date datee = jDateChooser2.getDate();
+//            fechaFin = String.valueOf(sdf.format(datee));
+//        }
+//        condate2++;
     }//GEN-LAST:event_jDateChooser2PropertyChange
 
     private void siguienteProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_siguienteProdBAActionPerformed
@@ -2366,13 +2363,17 @@ public class Administrador extends javax.swing.JFrame {
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
-                    System.out.println("inidice en eliminar " + indice);
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
                     //Empieza la obtención de los datos del producto que se busco
-                    idProductoGlobal = productoList.get(indice).getId();
-                    setIdProducto(idProductoGlobal);
+                   // idProductoGlobal = productoList.get(indice).getId();
+                   // setIdProducto(idProductoGlobal);
+                   for(int i=0;i<nombreProdGlobal.length;i++){
+                       if(nombreProdGlobal[i].equalsIgnoreCase(productoList.get(indice).getProductName())){
+                       setIndiceProductoEliminar(i);    
+                       }
+                   }                  
                     nombreProdBA.setText(productoList.get(indice).getProductName());
-                    setIndiceProductoEliminar(indice);
+                    
                     ImageIcon imagen = new ImageIcon(productoList.get(indice).getImage());
                     ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(contEliminarProd1.getWidth(), contEliminarProd1.getHeight(), Image.SCALE_DEFAULT));
                     contEliminarProd1.setIcon(icono);
@@ -2645,10 +2646,6 @@ public class Administrador extends javax.swing.JFrame {
 
     private String getCategoria() {
         return categoria;
-    }
-
-    private String getCategoriaMOD() {
-        return categoriaMOD;
     }
 
     private void setDireccionImagen(String direccion) {
