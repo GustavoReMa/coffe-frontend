@@ -18,7 +18,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.JButton;
@@ -28,9 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
 /**
@@ -39,12 +36,13 @@ import javax.swing.table.TableModel;
  */
 public class Cajero extends javax.swing.JFrame {
 
-    private UserVO user;
-    private UserCtrl userCtrl;
-    private SaleCtrl saleCtrl;
-    private ProductCtrl productCtrl;
+    private final UserVO user;
+    private final UserCtrl userCtrl;
+    private final SaleCtrl saleCtrl;
+    private final ProductCtrl productCtrl;
     private boolean areThereProductsOnSale = false; // Guarda el estado de la venta.
     private boolean isRowSelectedProductFound = false;
+    private boolean changedRowSelected = false;
     private int countStockRows = 0;
     private double totalSale = 0.0;
     private int saleID;
@@ -67,7 +65,7 @@ public class Cajero extends javax.swing.JFrame {
         DefaultTableModel stockDefault = ((DefaultTableModel) stockTable.getModel());
         stockDefault.addTableModelListener((rowAffected) -> {
             int lastRow = rowAffected.getLastRow();
-            if (rowAffected.getType() == TableModelEvent.INSERT && stockDefault.getValueAt(lastRow,6) != null) {
+            if (rowAffected.getType() == TableModelEvent.INSERT && stockDefault.getValueAt(lastRow, 6) != null) {
                 int quantity = (int) stockDefault.getValueAt(lastRow, 5);
                 double price = (double) stockDefault.getValueAt(lastRow, 6);
                 totalSale += quantity * price;
@@ -376,7 +374,8 @@ public class Cajero extends javax.swing.JFrame {
         // validar y llevar acabo la funcionalidad
         // revisar si no hay una venta actual.
         if (areThereProductsOnSale) {
-            throw new Error("Usteded necesita finalizar la venta");
+            JOptionPane.showMessageDialog(this, "Usted necesita finalizar la venta","Venta", JOptionPane.WARNING_MESSAGE);
+            return;
         }
 
         JFrame contenedorSes = new JFrame();
@@ -443,8 +442,8 @@ public class Cajero extends javax.swing.JFrame {
     private int getSaleId() {
         return saleID;
     }
-    
-    private void setSaleId(){
+
+    private void setSaleId() {
         saleID++;
     }
     private void purchaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseButtonActionPerformed
@@ -455,15 +454,15 @@ public class Cajero extends javax.swing.JFrame {
             sale.setTotalSale(totalSale);
             sale.setDateSale("2018-04-22");
             List<SaleVO.SaleProduct> saleProducts = new ArrayList<>();
-            DefaultTableModel defaultStock= (DefaultTableModel)stockTable.getModel();
-            while(countStockRows > 0 && defaultStock.getValueAt(0, 2) != null){
+            DefaultTableModel defaultStock = (DefaultTableModel) stockTable.getModel();
+            while (countStockRows > 0 && defaultStock.getValueAt(0, 2) != null) {
                 SaleVO.SaleProduct saleProduct = sale.new SaleProduct();
-                
-                int id= (Integer)defaultStock.getValueAt(0, 2);
-                String productName= (String)defaultStock.getValueAt(0, 3);
-                int quantity= (Integer)defaultStock.getValueAt(0, 5);
-                double neto= (Double)defaultStock.getValueAt(0, 7);
-                
+
+                int id = (Integer) defaultStock.getValueAt(0, 2);
+                String productName = (String) defaultStock.getValueAt(0, 3);
+                int quantity = (Integer) defaultStock.getValueAt(0, 5);
+                double neto = (Double) defaultStock.getValueAt(0, 7);
+
                 saleProduct.setProductId(id);
                 saleProduct.setProductName(productName);
                 saleProduct.setQuantityProduct(quantity);
@@ -478,26 +477,35 @@ public class Cajero extends javax.swing.JFrame {
             sale.setSaleProduct(saleProducts);
             saleCtrl.realizarVenta(sale);
             totalSale = 0;
-            areThereProductsOnSale= false;
+            areThereProductsOnSale = false;
             resetFinalSale();
             setSaleId();
             defaultStock.setRowCount(19);
         }
     }//GEN-LAST:event_purchaseButtonActionPerformed
 
-    private void resetFinalSale(){
+    private void resetFinalSale() {
         cashTextField.setText("");
         totalLabel.setText("$0.0");
         devolutionLabel.setText("$0.0");
     }
-    
+
     private void productToFindButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productToFindButtonActionPerformed
         if (!productToFindTextField.getText().equals("")) {
             List<ProductVO> productsMatches = this.productCtrl.buscarProducto(productToFindTextField.getText().toUpperCase());
             if (!productsMatches.isEmpty()) {
-                TableModel tableModel = productsTable.getModel();
+                DefaultTableModel tableModel = (DefaultTableModel) productsTable.getModel();
+                tableModel.addTableModelListener((e) -> {
+                    // verificar que el producto haya cambio a un valor mayor a 0
+                    //productsTable.getValueAt(e.getLastRow(),e.getColumn());
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        changedRowSelected= true;
+                    }
+                });
                 productsTable.getSelectionModel().addListSelectionListener((e) -> {
+                    System.out.println("afuera " + e.getValueIsAdjusting());
                     if (productsTable.getSelectedRow() > -1) {
+                        System.out.println("adentro " + e.getValueIsAdjusting());
                         isRowSelectedProductFound = true;
                     }
                 });
@@ -524,7 +532,7 @@ public class Cajero extends javax.swing.JFrame {
     }
 
     private void addToStockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToStockButtonActionPerformed
-        if (isRowSelectedProductFound) {
+        if (changedRowSelected && isRowSelectedProductFound) {
             DefaultTableModel stockModel = ((DefaultTableModel) stockTable.getModel());
             stockModel.isCellEditable(2, 3);
             while (stockModel.getRowCount() > countStockRows) {
@@ -563,6 +571,7 @@ public class Cajero extends javax.swing.JFrame {
             }
             productsFoundModel.setRowCount(4);
             isRowSelectedProductFound = false;
+            changedRowSelected= false;
             resetTextBox();
         } else {
             // Actually no row is selected
