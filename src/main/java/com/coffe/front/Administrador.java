@@ -11,6 +11,7 @@ import com.coffee.back.controller.vo.UserVO;
 import com.coffee.back.controller.vo.WorkerVO;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.toedter.calendar.JDateChooser;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
@@ -22,10 +23,22 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import static java.lang.String.valueOf;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -54,22 +67,21 @@ public class Administrador extends javax.swing.JFrame {
     private ProductVO producto; //Objeto que contendrá todos los atributos de un producto
     private List<ProductVO> productoList; //Objeto que contendrá a una lista de productos
     private WorkerVO trabajador; //Objeto que contendrá los atributos de un trabajador (usuario)
-    private List<WorkerVO> workerList;
+    private List<WorkerVO> workerList; //Lista de trabajadores
     private UserVO usuario; //Objeto que contendrá el nick del usuario y su contraseña
     private String categoria; //Variable que contendrá la categoría del producto en alta producto
-    private String categoriaMOD; //Variable que contendrá la categoría del producto en modificar producto
     Toolkit t = Toolkit.getDefaultToolkit(); //Objeto que manejará propiedades de la pantalla
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //Objeto que almacenará el tamaño de la pantalla
     JTable tabla = new JTable(); //Objeto que creará una tabla emergente
-    GenerarReportes gr = new GenerarReportes();
+    GenerarReportes gr = new GenerarReportes(); //Objeto de la clase GenerarReportes 
     String dirImagenesGlobal[], nombreProdGlobal[];
     int contadorProdEliminar = 0, contadorProdBa = 0;
-    int indiceProductoEliminar = 0, indiceProductoEliminar2 = 0, indiceProductoEliminar3 = 0, indiceProductoEliminar4 = 0,
-            indiceProductoEliminar5 = 0, indiceProductoEliminar6 = 0;
+    int indiceProductoEliminar = 0, indiceProductoEliminar2 = 0, indiceProductoEliminar3 = 0,
+            indiceProductoEliminar4 = 0, indiceProductoEliminar5 = 0, indiceProductoEliminar6 = 0;
 
     /*
     Éste método es un constructor que inicializa todas las variables utilizadas en la interfaz al crear una 
-    instacia de ésta clase
+    instacia de ésta clase 
      */
     public Administrador() {
         initComponents(); //Método que inicizaliza todas las variables 
@@ -78,7 +90,6 @@ public class Administrador extends javax.swing.JFrame {
         bloquearCamposUsuario();
         bloqBtnEliminarUsu();
         inicializarProductoEliminar();
-
     }
 
     private void inicializarProductoEliminar() {
@@ -93,9 +104,7 @@ public class Administrador extends javax.swing.JFrame {
         productoList = productCtrl.buscarProducto(nombreProdModBuscar);
         Iterator<ProductVO> productoIterador = productoList.iterator();
         Iterator<ProductVO> productoIterador2 = productoList.iterator();
-        /*Ciclo encargado de obtener los datos de los productos que coinciden con el nombre del que desea buscarse
-        y los agrega al modelo de la tabla
-         */
+        //Ciclo para obtener el tamaño del vector
         int contador = 0;
         while (productoIterador.hasNext()) {
             ProductVO productoCiclo = productoIterador.next();
@@ -105,6 +114,9 @@ public class Administrador extends javax.swing.JFrame {
         String nombreProd[] = new String[contador];
         System.out.println("Tamaño de vector: " + contador);
         int contador2 = 0;
+        /*Ciclo encargado de obtener los datos de los productos que coinciden con el nombre del que desea buscarse
+        y los agrega al modelo de la tabla
+         */
         while (productoIterador2.hasNext()) {
             ProductVO productoCiclo = productoIterador2.next();
             nombreProd[contador2] = productoCiclo.getProductName();
@@ -313,7 +325,7 @@ public class Administrador extends javax.swing.JFrame {
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jDateChooser2 = new com.toedter.calendar.JDateChooser();
         jLabel5 = new javax.swing.JLabel();
-        grafica = new javax.swing.JButton();
+        email = new javax.swing.JButton();
         cerrarSesionVentas = new javax.swing.JButton();
         usuariosGeneral = new javax.swing.JTabbedPane();
         usuarioAltaGral = new javax.swing.JPanel();
@@ -430,7 +442,7 @@ public class Administrador extends javax.swing.JFrame {
         jTabbedPane1.setFont(new java.awt.Font("Franklin Gothic Heavy", 0, 18)); // NOI18N
         jTabbedPane1.setName(""); // NOI18N
 
-        panelPrincipal.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "ESTADISTICA", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14), new java.awt.Color(0, 153, 153))); // NOI18N
+        panelPrincipal.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14), new java.awt.Color(0, 153, 153))); // NOI18N
         panelPrincipal.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -462,12 +474,10 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setText("aquí va la grafica");
-
-        grafica.setText("grafica");
-        grafica.addActionListener(new java.awt.event.ActionListener() {
+        email.setText("enviar email");
+        email.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                graficaActionPerformed(evt);
+                emailActionPerformed(evt);
             }
         });
 
@@ -476,20 +486,22 @@ public class Administrador extends javax.swing.JFrame {
         panelPrincipalLayout.setHorizontalGroup(
             panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelPrincipalLayout.createSequentialGroup()
-                .addGap(59, 59, 59)
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPrincipalLayout.createSequentialGroup()
+                    .addGroup(panelPrincipalLayout.createSequentialGroup()
+                        .addGap(59, 59, 59)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 435, Short.MAX_VALUE)
                         .addComponent(realizarReporteVentas))
                     .addGroup(panelPrincipalLayout.createSequentialGroup()
                         .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelPrincipalLayout.createSequentialGroup()
+                                .addGap(59, 59, 59)
                                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(72, 72, 72))
+                                .addGap(75, 75, 75))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPrincipalLayout.createSequentialGroup()
-                                .addComponent(grafica)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                                .addContainerGap()
+                                .addComponent(email)
+                                .addGap(59, 59, 59)))
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(panelPrincipalLayout.createSequentialGroup()
@@ -497,7 +509,7 @@ public class Administrador extends javax.swing.JFrame {
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(555, Short.MAX_VALUE))
+                .addContainerGap(559, Short.MAX_VALUE))
         );
         panelPrincipalLayout.setVerticalGroup(
             panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -510,13 +522,13 @@ public class Administrador extends javax.swing.JFrame {
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelPrincipalLayout.createSequentialGroup()
                         .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(31, 31, 31)
-                        .addComponent(grafica)
-                        .addGap(31, 31, 31)
+                        .addGap(85, 85, 85)
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 272, Short.MAX_VALUE))
+                        .addGap(119, 119, 119)
+                        .addComponent(email)
+                        .addGap(0, 130, Short.MAX_VALUE))
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -550,6 +562,8 @@ public class Administrador extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(panelPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
+
+        panelPrincipal.getAccessibleContext().setAccessibleName("");
 
         jTabbedPane1.addTab("VENTAS", ventasGeneral);
 
@@ -1648,6 +1662,10 @@ public class Administrador extends javax.swing.JFrame {
         passwordUsuAL.setText("");
         fotoUsuAL2.setIcon(null);
     }//GEN-LAST:event_cancelarUsuALActionPerformed
+    private void limpiarCamposUsuario(JTextField nombre, JTextField apellido, JTextField nick, JTextField dir) {
+
+    }
+
     /*Método que se encarga de limpiar los datos en pantalla al momento que el usuario
     de click en el botón cancelar
      */
@@ -1686,8 +1704,6 @@ public class Administrador extends javax.swing.JFrame {
             //Limpiamos los campos de la pantalla de alta producto
             limpiarProducto(nombreProdAL, cantidadProdAL, precioProdAL, categoriaProdAL, imagenProdAL2);
             inicializarProductoEliminar();
-        } else {
-
         }
     }//GEN-LAST:event_guardarProdALActionPerformed
 //Empiezan métodos para validar que los campos de los formularios estén escritos correctamente y tengan los valores esperados
@@ -2081,10 +2097,6 @@ public class Administrador extends javax.swing.JFrame {
             tm.addRow(datos);
         }
     }//GEN-LAST:event_buscarUsuMODActionPerformed
-    private void tipoUsuario(UserType u) {
-
-    }
-
     public void setIdUsuario(int id) {
         id_usuario = id;
     }
@@ -2286,32 +2298,49 @@ public class Administrador extends javax.swing.JFrame {
     private void realizarReporteVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_realizarReporteVentasActionPerformed
         gr.reporteVentas(getFechaInicio(), getFechaFin());
     }//GEN-LAST:event_realizarReporteVentasActionPerformed
-    int condate = 0;
+
     SimpleDateFormat sdf;
     String fechaInicio = "";
     private void jDateChooser1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser1PropertyChange
-//        if (condate == 0) {
-//        } else {
-//            String formato = jDateChooser1.getDateFormatString();
-//            Date date = jDateChooser1.getDate();
-//            sdf = new SimpleDateFormat(formato);
-//            fechaInicio = String.valueOf(sdf.format(date));
-//        }
-//        condate++;
+        if (jDateChooser1.getDate() != null) {
+            String formato = jDateChooser1.getDateFormatString();
+            Date date = jDateChooser1.getDate();
+            sdf = new SimpleDateFormat(formato);
+            String fecha1 = String.valueOf(sdf.format(date));
+            fechaInicio = fecha1;
+            System.out.println("Fecha inicio: " + fechaInicio);
+        } else {
+            // Fechas(jDateChooser1);
+        }
     }//GEN-LAST:event_jDateChooser1PropertyChange
-    int condate2 = 0;
     String fechaFin = "";
     private void jDateChooser2PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser2PropertyChange
-//        if (condate2 == 0) {
-//        } else {
-//            realizarReporteVentas.setEnabled(true);
-//            String formatoo = jDateChooser2.getDateFormatString();
-//            Date datee = jDateChooser2.getDate();
-//            fechaFin = String.valueOf(sdf.format(datee));
-//        }
-//        condate2++;
+        if (jDateChooser1.getDate() != null) {
+            realizarReporteVentas.setEnabled(true);
+            Date datee = jDateChooser2.getDate();
+            fechaFin = String.valueOf(sdf.format(datee));
+            System.out.println("fecha fin: " + fechaFin);
+        } else {
+            //       Fechas(jDateChooser2);
+        }
     }//GEN-LAST:event_jDateChooser2PropertyChange
 
+    private void Fechas(JDateChooser jdc) {
+        DateFormat df = DateFormat.getDateInstance();
+        Date fechaActual = new Date();
+
+        System.out.println("");
+
+        jdc.setDate(fechaActual);
+    }
+
+    private String getFechaInicio() {
+        return fechaInicio;
+    }
+
+    private String getFechaFin() {
+        return fechaFin;
+    }
     private void siguienteProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_siguienteProdBAActionPerformed
         contadorProdEliminar++;
         pintarImagenProducto(dirImagenesGlobal);
@@ -2353,15 +2382,15 @@ public class Administrador extends javax.swing.JFrame {
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
                     //Empieza la obtención de los datos del producto que se busco
-                   // idProductoGlobal = productoList.get(indice).getId();
-                   // setIdProducto(idProductoGlobal);
-                   for(int i=0;i<nombreProdGlobal.length;i++){
-                       if(nombreProdGlobal[i].equalsIgnoreCase(productoList.get(indice).getProductName())){
-                       setIndiceProductoEliminar(i);    
-                       }
-                   }                  
+                    // idProductoGlobal = productoList.get(indice).getId();
+                    // setIdProducto(idProductoGlobal);
+                    for (int i = 0; i < nombreProdGlobal.length; i++) {
+                        if (nombreProdGlobal[i].equalsIgnoreCase(productoList.get(indice).getProductName())) {
+                            setIndiceProductoEliminar(i);
+                        }
+                    }
                     nombreProdBA.setText(productoList.get(indice).getProductName());
-                    
+
                     ImageIcon imagen = new ImageIcon(productoList.get(indice).getImage());
                     ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(contEliminarProd1.getWidth(), contEliminarProd1.getHeight(), Image.SCALE_DEFAULT));
                     contEliminarProd1.setIcon(icono);
@@ -2404,11 +2433,11 @@ public class Administrador extends javax.swing.JFrame {
         nombreUsuarioBaja.setText("NOMBRE");
         apellidoUsuarioBaja.setText("APELLIDO");
     }//GEN-LAST:event_eliminarUsuarioBtnActionPerformed
-    private void eliminarUsuario(String nombre){
+    private void eliminarUsuario(String nombre) {
         Injector injector = Guice.createInjector(new ConfigureUserDI());
         UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
         String userRecover = userCtrl.bajaUsuario(nombre);
-        JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);  
+        JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
     }
     private void opcionEliminarProd1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd1ActionPerformed
         System.out.println(getIndiceProductoEliminar() + " : " + dirImagenesGlobal[getIndiceProductoEliminar()]
@@ -2445,8 +2474,8 @@ public class Administrador extends javax.swing.JFrame {
                 + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar6()]);
         confirmacionEliminarProd(getIndiceProductoEliminar6());
     }//GEN-LAST:event_opcionEliminarProd6ActionPerformed
-    private void opcionEliminarUsuario(){
-         JFrame contenedor = new JFrame();
+    private void opcionEliminarUsuario() {
+        JFrame contenedor = new JFrame();
         contenedor.setBounds(screenSize.width / 4, screenSize.height / 4, 280, 120);
         contenedor.setVisible(true);
         contenedor.setResizable(false);
@@ -2458,7 +2487,7 @@ public class Administrador extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 contenedor.dispose();
-                eliminarUsuario(nickEliminarGlobal);   
+                eliminarUsuario(nickEliminarGlobal);
             }
         });
         cancelar.addActionListener(new ActionListener() {
@@ -2472,6 +2501,7 @@ public class Administrador extends javax.swing.JFrame {
         contenedorPanel.add(cancelar);
         contenedor.add(contenedorPanel);
     }
+
     private void confirmacionEliminarProd(int indice) {
         JFrame contenedor = new JFrame();
         contenedor.setBounds(screenSize.width / 4, screenSize.height / 4, 280, 120);
@@ -2549,15 +2579,45 @@ public class Administrador extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_buscarUsuarioBajaActionPerformed
-    private void bloqBtnEliminarUsu(){
+    private void bloqBtnEliminarUsu() {
         eliminarUsuarioBtn.setEnabled(false);
     }
-    private void desBtnEliminarUsu(){
+
+    private void desBtnEliminarUsu() {
         eliminarUsuarioBtn.setEnabled(true);
     }
-    private void graficaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_graficaActionPerformed
+    private void emailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emailActionPerformed
+        try {
+            Properties props = new Properties();
+            props.setProperty("mail.smtp.host", "smtp.gmail.com");
+            props.setProperty("mail.smtp.starttls", "true");
+            props.setProperty("mail.smtp.port", "587");
+            props.setProperty("mail.smtp.auth", "true");
+            Session sesion = Session.getDefaultInstance(props);
+            String correoRemitente = "vermonsadecv@gmail.com";
+            String passwordRemitente = "vermon123";
+            String correoReceptor = "gustavosh0154@gmail.com";
+            String asunto = "Mi primer correo en java";
+            String mensaje = "Este es el contenido de mi primer video";
+            MimeMessage message = new MimeMessage(sesion);
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(correoReceptor));
+            message.setSubject(asunto);
+            message.setText(mensaje);
+            Transport t = sesion.getTransport("smtp");
+            t.connect(correoRemitente, passwordRemitente);
+            t.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+            t.close();
+            JOptionPane.showMessageDialog(null, "Correo electronico enviado");
 
-    }//GEN-LAST:event_graficaActionPerformed
+            message.setFrom(new InternetAddress(correoRemitente));
+        } catch (AddressException ex) {
+            Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MessagingException ex) {
+            Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }//GEN-LAST:event_emailActionPerformed
 
     private void fotoUsuMOD1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fotoUsuMOD1ActionPerformed
         escogerImagen(fotoUsuMOD2);
@@ -2624,14 +2684,6 @@ public class Administrador extends javax.swing.JFrame {
         fotoUsuMOD1.setEnabled(true);
     }
 
-    private String getFechaInicio() {
-        return fechaInicio;
-    }
-
-    private String getFechaFin() {
-        return fechaFin;
-    }
-
     private String getCategoria() {
         return categoria;
     }
@@ -2680,6 +2732,7 @@ public class Administrador extends javax.swing.JFrame {
     private javax.swing.JTextField direccionUsuAL;
     private javax.swing.JTextField direccionUsuMOD;
     private javax.swing.JButton eliminarUsuarioBtn;
+    private javax.swing.JButton email;
     private javax.swing.JTextField emailUsuAL;
     private javax.swing.JTextField emailUsuMOD;
     private javax.swing.JLabel etiquetaNomProdAL;
@@ -2688,7 +2741,6 @@ public class Administrador extends javax.swing.JFrame {
     private javax.swing.JButton fotoUsuMOD1;
     private javax.swing.JLabel fotoUsuMOD2;
     private javax.swing.JLabel fotoUsuarioBaja;
-    private javax.swing.JButton grafica;
     private javax.swing.JButton guardarProdAL;
     private javax.swing.JButton guardarProdMOD;
     private javax.swing.JButton guardarUsuAL;
