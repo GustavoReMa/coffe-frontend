@@ -138,28 +138,22 @@
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="59" pref="59" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
                                       <Component id="jLabel1" min="-2" pref="31" max="-2" attributes="0"/>
-                                      <EmptySpace pref="435" max="32767" attributes="0"/>
-                                      <Component id="realizarReporteVentas" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="439" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" attributes="0">
-                                              <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
-                                              <Component id="jLabel2" min="-2" pref="24" max="-2" attributes="0"/>
-                                              <EmptySpace min="-2" pref="75" max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="1" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="email" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
-                                          </Group>
-                                      </Group>
+                                      <Component id="jLabel2" min="-2" pref="24" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="105" max="-2" attributes="0"/>
                                       <Component id="jLabel5" max="32767" attributes="0"/>
                                   </Group>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="realizarReporteVentas" max="32767" attributes="0"/>
+                                  <Component id="enviarEmail" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -184,14 +178,17 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="jDateChooser1" min="-2" pref="30" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="85" max="-2" attributes="0"/>
-                                      <Component id="jLabel2" min="-2" pref="24" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Group type="102" attributes="0">
+                                              <Component id="jDateChooser1" min="-2" pref="30" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="85" max="-2" attributes="0"/>
+                                              <Component id="jLabel2" min="-2" pref="24" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Component id="enviarEmail" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="jDateChooser2" min="-2" pref="32" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="119" max="-2" attributes="0"/>
-                                      <Component id="email" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="130" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="272" max="32767" attributes="0"/>
                                   </Group>
                                   <Component id="jLabel5" max="32767" attributes="0"/>
                               </Group>
@@ -219,9 +216,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="realizarReporteVentas">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -249,21 +243,21 @@
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel5">
                     </Component>
-                    <Component class="javax.swing.JButton" name="email">
+                    <Component class="javax.swing.JButton" name="enviarEmail">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="enviar email"/>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Tahoma" size="14" style="0"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="ENVIAR REPORTE"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="emailActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enviarEmailActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
                 </Container>
                 <Component class="javax.swing.JButton" name="cerrarSesionVentas">
                   <Properties>
-                    <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                      <Color blue="87" green="85" red="6" type="rgb"/>
-                    </Property>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Tahoma" size="14" style="0"/>
                     </Property>
@@ -543,9 +537,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="fotoUsuAL">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -557,9 +548,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="guardarUsuAL">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -571,9 +559,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="cancelarUsuAL">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -650,8 +635,8 @@
                               <Component id="buscarUsuarioBaja" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="eliminarUsuarioBtn" alignment="0" min="-2" pref="33" max="-2" attributes="0"/>
-                                  <Component id="fotoUsuarioBaja" alignment="0" min="-2" pref="132" max="-2" attributes="0"/>
+                                  <Component id="fotoUsuarioBaja" min="-2" pref="132" max="-2" attributes="0"/>
+                                  <Component id="eliminarUsuarioBtn" min="-2" pref="33" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="nombreUsuarioBaja" min="-2" max="-2" attributes="0"/>
@@ -968,9 +953,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="guardarUsuMOD">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -982,9 +964,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="cancelarUsuMOD">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -996,9 +975,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="buscarUsuMOD">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -1010,9 +986,6 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="fotoUsuMOD1">
                       <Properties>
-                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                          <Color blue="87" green="85" red="6" type="rgb"/>
-                        </Property>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Tahoma" size="14" style="0"/>
                         </Property>
@@ -1034,9 +1007,6 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="nickUsuMOD">
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nickUsuMODActionPerformed"/>
-                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -1560,9 +1530,6 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="guardarProdMOD">
                           <Properties>
-                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="87" green="85" red="6" type="rgb"/>
-                            </Property>
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="Tahoma" size="14" style="0"/>
                             </Property>
@@ -1574,9 +1541,6 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="cancelarProdMOD">
                           <Properties>
-                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="87" green="85" red="6" type="rgb"/>
-                            </Property>
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="Tahoma" size="14" style="0"/>
                             </Property>
@@ -1731,9 +1695,6 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="aceptarProdCON">
                           <Properties>
-                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="87" green="85" red="6" type="rgb"/>
-                            </Property>
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="Tahoma" size="14" style="0"/>
                             </Property>
@@ -1991,9 +1952,6 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="buscarProdBA">
                           <Properties>
-                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="87" green="85" red="6" type="rgb"/>
-                            </Property>
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="Tahoma" size="14" style="0"/>
                             </Property>

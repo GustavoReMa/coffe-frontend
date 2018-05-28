@@ -22,7 +22,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import static java.lang.String.valueOf;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,12 +37,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.swing.ImageIcon;
+import javax.mail.internet.MimeMultipart;
+import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -54,7 +61,9 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-
+import javax.swing.table.TableModel;
+//Injector: se encargará de la comunicación de la base de datos con java
+//Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
 /*La clase administrador contiene todas las funcionalidades del administrador como lo son;
 alta producto, modificar producto, consulta producto, baja producto, alta usuario, baja 
 usuario, modificar usuario, visualizar estadísticas, realizar reporte y cerrar sesión.
@@ -74,22 +83,23 @@ public class Administrador extends javax.swing.JFrame {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //Objeto que almacenará el tamaño de la pantalla
     JTable tabla = new JTable(); //Objeto que creará una tabla emergente
     GenerarReportes gr = new GenerarReportes(); //Objeto de la clase GenerarReportes 
-    String dirImagenesGlobal[], nombreProdGlobal[];
+    String dirImagenesGlobal[], nombreProdGlobal[]; //Vectores que contendrán las direcciones y nombres de los productos
     int contadorProdEliminar = 0, contadorProdBa = 0;
     int indiceProductoEliminar = 0, indiceProductoEliminar2 = 0, indiceProductoEliminar3 = 0,
-            indiceProductoEliminar4 = 0, indiceProductoEliminar5 = 0, indiceProductoEliminar6 = 0;
+            indiceProductoEliminar4 = 0, indiceProductoEliminar5 = 0, indiceProductoEliminar6 = 0; //Variables que conten-
+    //dran los índices de los productos con respecto a la interfaz de Baja producto
 
     /*
-    Éste método es un constructor que inicializa todas las variables utilizadas en la interfaz al crear una 
-    instacia de ésta clase 
+    <<Administrador>>Éste método es un constructor que inicializa todas las variables utilizadas en la interfaz 
+    al crear una instacia de ésta clase 
      */
     public Administrador() {
         initComponents(); //Método que inicizaliza todas las variables 
-        realizarReporteVentas.setEnabled(false);
-        bloquearCamposProd();
-        bloquearCamposUsuario();
-        bloqBtnEliminarUsu();
-        inicializarProductoEliminar();
+        realizarReporteVentas.setEnabled(false); //Inicializa al componente realizar reporte en inhabilitado
+        bloquearCamposProd(); //Inicializa campos del formulario de producto en inhabilitados
+        bloquearCamposUsuario(); //Inicializa campos del formulario de usuario en inhabilitados
+        bloqBtnEliminarUsu(); //Inicializa campos de Eliminar usuario en inhabilitado
+        inicializarProductoEliminar(); //Carga imágenes de los productos en Baja producto
     }
 
     private void inicializarProductoEliminar() {
@@ -102,17 +112,16 @@ public class Administrador extends javax.swing.JFrame {
         ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
         //Se guarda en el objeto productoList una lista de todos los productos que coinciden con el nombre
         productoList = productCtrl.buscarProducto(nombreProdModBuscar);
-        Iterator<ProductVO> productoIterador = productoList.iterator();
-        Iterator<ProductVO> productoIterador2 = productoList.iterator();
+        Iterator<ProductVO> productoIterador = productoList.iterator(); //objeto para saber de qué tamaño es el vector
+        Iterator<ProductVO> productoIterador2 = productoList.iterator(); // objeto para recorrer por los elementos del vector
         //Ciclo para obtener el tamaño del vector
         int contador = 0;
         while (productoIterador.hasNext()) {
             ProductVO productoCiclo = productoIterador.next();
             contador++;
         }
-        String dirImagen[] = new String[contador];
-        String nombreProd[] = new String[contador];
-        System.out.println("Tamaño de vector: " + contador);
+        String dirImagen[] = new String[contador];  //Contendrá las direcciones de los productos
+        String nombreProd[] = new String[contador]; //Contendrá los nombres de los productos
         int contador2 = 0;
         /*Ciclo encargado de obtener los datos de los productos que coinciden con el nombre del que desea buscarse
         y los agrega al modelo de la tabla
@@ -121,20 +130,25 @@ public class Administrador extends javax.swing.JFrame {
             ProductVO productoCiclo = productoIterador2.next();
             nombreProd[contador2] = productoCiclo.getProductName();
             dirImagen[contador2] = productoCiclo.getImage();
-            System.out.println(dirImagen[contador2]);
             contador2++;
         }
-        contadorProdEliminar = 1;
-        nombreProdGlobal = nombreProd.clone();
-        dirImagenesGlobal = dirImagen.clone();
+        contadorProdEliminar = 1; //Variable que contendrá en qué ventana está en baja producto
+        nombreProdGlobal = nombreProd.clone(); //Variable específicada anteriormente
+        dirImagenesGlobal = dirImagen.clone(); //Variable específicada anteriormente
         pintarImagenProducto(dirImagenesGlobal);
     }
 
+    /* <<pintarImagenProducto>> método encargado de pintar las imágenes de los productos 
+    que existen en la base de datos en el servicio de baja producto*/
     public void pintarImagenProducto(String[] direcciones) {
-        int capacidad = direcciones.length / 6;
-        int modulo = direcciones.length % 6;
-        int indiceNumero = (contadorProdEliminar * 6) - 6;
-        System.out.println(contadorProdEliminar);
+        int capacidad = direcciones.length / 6; //Variable que contendrá el total de los productos que podrán irse
+        //mostrando de 6 en 6 en la pinterfaz de baja producto
+        int modulo = direcciones.length % 6; //Variable que contendrá cuántas imágenes se mostrarán en la interfaz
+        //de baja producto cuando éstas lleguen al final
+        int indiceNumero = (contadorProdEliminar * 6) - 6; //Variable que nos dirá el índice de cada producto existente
+        //Empiezan a agregar imágenes a los JLabel de los productos y las validaciones que nos ayudarán a tener un control 
+        //en las imágenes de los productos que se mostraran en la interfaz de baja producto dependiendo de cuántos 
+        //productos existan y  en cuántas veces se preciono los botones de adelante y atrás 
         if (contadorProdEliminar <= 1) {
             atrasProdBA.setEnabled(false);
         } else {
@@ -256,8 +270,11 @@ public class Administrador extends javax.swing.JFrame {
                 }
             }
         }
+        //Terminan las validaciones y los agregados de imágenes a los label de la interfaz baja usuario
     }
 
+    //Los métodos setIndiceProductoEliminar nos ayudarán a tener el control del índice del producto que 
+    //se desea eliminar
     public void setIndiceProductoEliminar(int indice) {
         indiceProductoEliminar = indice;
     }
@@ -305,6 +322,7 @@ public class Administrador extends javax.swing.JFrame {
     public int getIndiceProductoEliminar6() {
         return indiceProductoEliminar6;
     }
+    //Terminan los métodos de getInidiceProductoEliminar
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -325,7 +343,7 @@ public class Administrador extends javax.swing.JFrame {
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jDateChooser2 = new com.toedter.calendar.JDateChooser();
         jLabel5 = new javax.swing.JLabel();
-        email = new javax.swing.JButton();
+        enviarEmail = new javax.swing.JButton();
         cerrarSesionVentas = new javax.swing.JButton();
         usuariosGeneral = new javax.swing.JTabbedPane();
         usuarioAltaGral = new javax.swing.JPanel();
@@ -451,7 +469,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel2.setText("A");
 
-        realizarReporteVentas.setBackground(new java.awt.Color(6, 133, 135));
         realizarReporteVentas.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         realizarReporteVentas.setText("REALIZAR REPORTE");
         realizarReporteVentas.addActionListener(new java.awt.event.ActionListener() {
@@ -474,10 +491,11 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        email.setText("enviar email");
-        email.addActionListener(new java.awt.event.ActionListener() {
+        enviarEmail.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        enviarEmail.setText("ENVIAR REPORTE");
+        enviarEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                emailActionPerformed(evt);
+                enviarEmailActionPerformed(evt);
             }
         });
 
@@ -486,23 +504,19 @@ public class Administrador extends javax.swing.JFrame {
         panelPrincipalLayout.setHorizontalGroup(
             panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelPrincipalLayout.createSequentialGroup()
+                .addGap(59, 59, 59)
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelPrincipalLayout.createSequentialGroup()
-                        .addGap(59, 59, 59)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 435, Short.MAX_VALUE)
-                        .addComponent(realizarReporteVentas))
+                        .addGap(0, 439, Short.MAX_VALUE))
                     .addGroup(panelPrincipalLayout.createSequentialGroup()
-                        .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelPrincipalLayout.createSequentialGroup()
-                                .addGap(59, 59, 59)
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(75, 75, 75))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPrincipalLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(email)
-                                .addGap(59, 59, 59)))
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(105, 105, 105)
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(realizarReporteVentas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(enviarEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(panelPrincipalLayout.createSequentialGroup()
                 .addContainerGap()
@@ -521,19 +535,19 @@ public class Administrador extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelPrincipalLayout.createSequentialGroup()
-                        .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(85, 85, 85)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(panelPrincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelPrincipalLayout.createSequentialGroup()
+                                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(85, 85, 85)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(enviarEmail))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(119, 119, 119)
-                        .addComponent(email)
-                        .addGap(0, 130, Short.MAX_VALUE))
+                        .addGap(0, 272, Short.MAX_VALUE))
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        cerrarSesionVentas.setBackground(new java.awt.Color(6, 133, 135));
         cerrarSesionVentas.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         cerrarSesionVentas.setText("CERRAR SESIÓN");
         cerrarSesionVentas.addActionListener(new java.awt.event.ActionListener() {
@@ -562,8 +576,6 @@ public class Administrador extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(panelPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
-
-        panelPrincipal.getAccessibleContext().setAccessibleName("");
 
         jTabbedPane1.addTab("VENTAS", ventasGeneral);
 
@@ -617,7 +629,6 @@ public class Administrador extends javax.swing.JFrame {
 
         fotoUsuAL2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 102, 102)));
 
-        fotoUsuAL.setBackground(new java.awt.Color(6, 133, 135));
         fotoUsuAL.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         fotoUsuAL.setText("FOTO");
         fotoUsuAL.addActionListener(new java.awt.event.ActionListener() {
@@ -626,7 +637,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        guardarUsuAL.setBackground(new java.awt.Color(6, 133, 135));
         guardarUsuAL.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         guardarUsuAL.setText("GUARDAR");
         guardarUsuAL.addActionListener(new java.awt.event.ActionListener() {
@@ -635,7 +645,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        cancelarUsuAL.setBackground(new java.awt.Color(6, 133, 135));
         cancelarUsuAL.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         cancelarUsuAL.setText("CANCELAR");
         cancelarUsuAL.addActionListener(new java.awt.event.ActionListener() {
@@ -802,8 +811,8 @@ public class Administrador extends javax.swing.JFrame {
                 .addComponent(buscarUsuarioBaja)
                 .addGap(45, 45, 45)
                 .addGroup(usuarioBajaGralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(eliminarUsuarioBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fotoUsuarioBaja, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(fotoUsuarioBaja, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(eliminarUsuarioBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(nombreUsuarioBaja)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -848,7 +857,6 @@ public class Administrador extends javax.swing.JFrame {
 
         fotoUsuMOD2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 102, 102)));
 
-        guardarUsuMOD.setBackground(new java.awt.Color(6, 133, 135));
         guardarUsuMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         guardarUsuMOD.setText("GUARDAR");
         guardarUsuMOD.addActionListener(new java.awt.event.ActionListener() {
@@ -857,7 +865,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        cancelarUsuMOD.setBackground(new java.awt.Color(6, 133, 135));
         cancelarUsuMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         cancelarUsuMOD.setText("CANCELAR");
         cancelarUsuMOD.addActionListener(new java.awt.event.ActionListener() {
@@ -866,7 +873,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        buscarUsuMOD.setBackground(new java.awt.Color(6, 133, 135));
         buscarUsuMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         buscarUsuMOD.setText("BUSCAR");
         buscarUsuMOD.addActionListener(new java.awt.event.ActionListener() {
@@ -875,7 +881,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        fotoUsuMOD1.setBackground(new java.awt.Color(6, 133, 135));
         fotoUsuMOD1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         fotoUsuMOD1.setText("FOTO");
         fotoUsuMOD1.addActionListener(new java.awt.event.ActionListener() {
@@ -887,12 +892,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel15.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel15.setForeground(new java.awt.Color(0, 102, 102));
         jLabel15.setText("NICK");
-
-        nickUsuMOD.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nickUsuMODActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout usuarioModificarGralLayout = new javax.swing.GroupLayout(usuarioModificarGral);
         usuarioModificarGral.setLayout(usuarioModificarGralLayout);
@@ -1190,7 +1189,6 @@ public class Administrador extends javax.swing.JFrame {
 
         imagenProdMOD2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 102, 102)));
 
-        guardarProdMOD.setBackground(new java.awt.Color(6, 133, 135));
         guardarProdMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         guardarProdMOD.setText("GUARDAR");
         guardarProdMOD.addActionListener(new java.awt.event.ActionListener() {
@@ -1199,7 +1197,6 @@ public class Administrador extends javax.swing.JFrame {
             }
         });
 
-        cancelarProdMOD.setBackground(new java.awt.Color(6, 133, 135));
         cancelarProdMOD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         cancelarProdMOD.setText("CANCELAR");
         cancelarProdMOD.addActionListener(new java.awt.event.ActionListener() {
@@ -1323,7 +1320,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel43.setForeground(new java.awt.Color(0, 102, 102));
         jLabel43.setText("NOMBRE");
 
-        aceptarProdCON.setBackground(new java.awt.Color(6, 133, 135));
         aceptarProdCON.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         aceptarProdCON.setText("ACEPTAR");
         aceptarProdCON.addActionListener(new java.awt.event.ActionListener() {
@@ -1413,7 +1409,6 @@ public class Administrador extends javax.swing.JFrame {
         jLabel45.setForeground(new java.awt.Color(0, 102, 102));
         jLabel45.setText("NOMBRE");
 
-        buscarProdBA.setBackground(new java.awt.Color(6, 133, 135));
         buscarProdBA.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         buscarProdBA.setText("BUSCAR");
         buscarProdBA.addActionListener(new java.awt.event.ActionListener() {
@@ -1639,45 +1634,42 @@ public class Administrador extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    /*<<cancelarUsuMOD>> método que limpia los campos de la interfaz Modificar usuario y los bloquea mientras
+    no haya ningún usuario seleccionado*/
     private void cancelarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuMODActionPerformed
         bloquearCamposUsuario();
-        nombreUsuMOD.setText("");
-        apellidoUsuMOD.setText("");
-        nickUsuMOD.setText("");
-        direccionUsuMOD.setText("");
-        telefonoUsuMOD.setText("");
-        emailUsuMOD.setText("");
+        limpiarCamposUsuario(nombreUsuMOD, apellidoUsuMOD, nickUsuMOD, direccionUsuMOD, telefonoUsuMOD, emailUsuMOD, fotoUsuMOD2);
         passwordUsuMOD.setText("");
-        fotoUsuMOD2.setIcon(null);
     }//GEN-LAST:event_cancelarUsuMODActionPerformed
-
+    /*<<cancelarUsuAL>> método que limpia los campos de la interfaz Alta usuario*/
     private void cancelarUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarUsuALActionPerformed
-        nombreUsuAL.setText("");
-        apellidoUsuAL.setText("");
-        nickUsuAL.setText("");
-        direccionUsuAL.setText("");
-        telefonoUsuAL.setText("");
-        emailUsuAL.setText("");
+        limpiarCamposUsuario(nombreUsuAL, apellidoUsuAL, nickUsuAL, direccionUsuAL, telefonoUsuAL, emailUsuAL, fotoUsuAL2);
         passwordUsuAL.setText("");
-        fotoUsuAL2.setIcon(null);
     }//GEN-LAST:event_cancelarUsuALActionPerformed
-    private void limpiarCamposUsuario(JTextField nombre, JTextField apellido, JTextField nick, JTextField dir) {
 
+    /*Método que se encarga de limpiar los datos en pantalla al momento que el usuario*/
+    //Método encargado de limpiar los campos del formulario de usuarios
+    private void limpiarCamposUsuario(JTextField nombre, JTextField apellido, JTextField nick, JTextField dir, JTextField telefono, JTextField email, JLabel foto) {
+        nombre.setText("");
+        apellido.setText("");
+        nick.setText("");
+        dir.setText("");
+        telefono.setText("");
+        email.setText("");
+        foto.setIcon(null);
     }
-
-    /*Método que se encarga de limpiar los datos en pantalla al momento que el usuario
+    /*Método que se encarga de limpiar los datos en pantalla de productos al momento que el usuario
     de click en el botón cancelar
      */
     private void cancelarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdALActionPerformed
         //Limpiamos los campos de la pantalla de alta producto
         limpiarProducto(nombreProdAL, cantidadProdAL, precioProdAL, categoriaProdAL, imagenProdAL2);
     }//GEN-LAST:event_cancelarProdALActionPerformed
-    /*Método que se encargará de leer los datos ingresados en la interfaz 
+    /*Método que se encargará de leer los datos ingresados en la interfaz Alta producto
     y los mandará a los métodos correspondientes para manejar los datos     
      */
     private void guardarProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdALActionPerformed
-        producto = new ProductVO();
+        producto = new ProductVO(); //Objeto que contendrá los datos del producto
         validarProducto(nombreProdAL, cantidadProdAL, precioProdAL, categoriaProdAL, imagenProdAL2);
         if (getValidarTerminadoProducto()) {
             String cantidadString = "";
@@ -1751,7 +1743,8 @@ public class Administrador extends javax.swing.JFrame {
             System.out.println(e.getMessage());
         }
     }
-    boolean estadoDeValidacionProd = false;
+    boolean estadoDeValidacionProd = false; //Variable encargada del estado de la validación de los campos del producto
+    //Métodos set y get que almacena y regresa el valor de la variable estadoDeValidacionProd
 
     public void setValidarProductoTerminado(boolean aceptado) {
         estadoDeValidacionProd = true;
@@ -1761,6 +1754,8 @@ public class Administrador extends javax.swing.JFrame {
         return estadoDeValidacionProd;
     }
 
+    /*<<validarUsuario>> método encargado de validar que los campos de los servicios de usuario estén llenados
+    y escritos correctamente*/
     public void validarUsuario(JTextField nombre, JTextField apellido, JTextField nick, JTextField telefono, JTextField dir, JTextField email, JLabel foto) {
         try {
             if (!nombre.getText().isEmpty()) {
@@ -1798,7 +1793,8 @@ public class Administrador extends javax.swing.JFrame {
             System.out.println(e.getMessage());
         }
     }
-    boolean estadoDeValidacionUsuAL = false;
+    boolean estadoDeValidacionUsuAL = false; //Variable que contiene el estado de la validación de los campos de usuario
+    //Método set y get que guardan y regresan el estado de la variable estadoDeValidacionUsuAL
 
     public void setValidarTerminadoUsuAL(boolean aceptado) {
         estadoDeValidacionUsuAL = true;
@@ -1811,11 +1807,18 @@ public class Administrador extends javax.swing.JFrame {
     private void imagenProd1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_imagenProd1MouseClicked
         escogerImagen(imagenProdAL2);
     }//GEN-LAST:event_imagenProd1MouseClicked
-    /* 
-    Método encargado de saber qué categoría presiono el usuario del producto
-     */
+
     private void categoriaProdALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoriaProdALActionPerformed
         JComboBox<String> combo = (JComboBox<String>) evt.getSource(); //Se declara una variable de tipo JComboBox
+        seleccionarCategoria(combo);
+    }//GEN-LAST:event_categoriaProdALActionPerformed
+    //Método que seteado al campo cantidad cuando se selecciona en categoría a comida
+    private void categoriaCantidad(JSpinner cantidad) {
+        cantidad.getModel().setValue(0);
+    }
+
+    /*Método encargado de saber qué categoría presiono el usuario del producto en la interfaz Alta producto */
+    private void seleccionarCategoria(JComboBox combo) {
         switch (combo.getSelectedIndex()) { //Se obtiene el índice de la selección del comboBox
             case 1:
                 categoria = "COMIDA RAPIDA";
@@ -1833,14 +1836,9 @@ public class Administrador extends javax.swing.JFrame {
             case 5:
                 categoria = "BREAD";
         }
-    }//GEN-LAST:event_categoriaProdALActionPerformed
-    private void categoriaCantidad(JSpinner cantidad) {
-        cantidad.getModel().setValue(0);
     }
-    /*
-    Método encargado de buscar un producto, y verificar qué producto fue selecionado
-    y en base a eso mostrar los datos en pantalla para su modificación
-     */
+    /*Método encargado de buscar un producto, y verificar qué producto fue selecionado
+    y en base a eso mostrar los datos en pantalla para su modificación*/
     int idProductoGlobal = 0;
     private void buscarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarProdMODActionPerformed
         productoList = new ArrayList<>(); //se crea un objeto de tipo ArrayList
@@ -1873,7 +1871,7 @@ public class Administrador extends javax.swing.JFrame {
                     desbloquearCamposProd();
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
-                    //Empieza la obtención de los datos del producto que se busco
+                    //Empieza la obtención de los datos del producto que se busco para mostrarse en la interfaz modificar producto
                     idProductoGlobal = productoList.get(indice).getId();
                     setIdProducto(idProductoGlobal);
                     nombreProdMOD.setText(productoList.get(indice).getProductName());
@@ -1905,7 +1903,6 @@ public class Administrador extends javax.swing.JFrame {
                     ImageIcon imagen = new ImageIcon(productoList.get(indice).getImage());
                     ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(imagenProdMOD2.getWidth(), imagenProdMOD2.getHeight(), Image.SCALE_DEFAULT));
                     imagenProdMOD2.setIcon(icono);
-
                     //Finaliza la obtención de los datos 
                 }
             }
@@ -1974,21 +1971,15 @@ public class Administrador extends javax.swing.JFrame {
                 String userRecover = userCtrl.altaUsuario(trabajador);
                 JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
                 //Limpiamos los campos de la pantalla de alta producto
-                nombreUsuAL.setText("");
-                nickUsuAL.setText("");
-                direccionUsuAL.setText("");
-                apellidoUsuAL.setText("");
-                telefonoUsuAL.setText("");
-                emailUsuAL.setText("");
+                limpiarCamposUsuario(nombreUsuAL, apellidoUsuAL, nickUsuAL, direccionUsuAL, telefonoUsuAL, emailUsuAL, fotoUsuAL2);
                 passwordUsuAL.setText("");
-                fotoUsuAL2.setIcon(null);
             } else {
                 JOptionPane.showMessageDialog(null, "Ingrese contraseña", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
             }
-
         }
     }//GEN-LAST:event_guardarUsuALActionPerformed
-
+    /*fotoUsuAL encargado de llamar al método <<escogerImagen>> para escoger qué imagen quiere que tenga 
+    su usuario en la interfaz Alta usuario*/
     private void fotoUsuALActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fotoUsuALActionPerformed
         escogerImagen(fotoUsuAL2);
     }//GEN-LAST:event_fotoUsuALActionPerformed
@@ -2036,10 +2027,11 @@ public class Administrador extends javax.swing.JFrame {
         });
     }//GEN-LAST:event_aceptarProdCONActionPerformed
     int id_usuario, tipoUsuarioNum;
+    /*Variable que contiene el id del usuario y el número de usuario que es,
+    si es de tipo CAJERO valdrá 0 y si es de tipo ADMINISTRADOR valdrá 1*/
     UserType usertype;
     private void buscarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarUsuMODActionPerformed
         workerList = new ArrayList<>(); //se crea un objeto de tipo ArrayList
-        String nombreUsuModBuscar = nombreProdMOD.getText().toUpperCase(); //Se obtiene el nombre del producto a buscar
         /*Se declara un injector y se le declara el tipo de clase a la que queremos que haga referencia, en este caso
         a una configuración de producto */
         Injector injector = Guice.createInjector(new ConfigureUserDI());
@@ -2067,7 +2059,8 @@ public class Administrador extends javax.swing.JFrame {
                 if (e.getClickCount() == 2) {
                     int indice = tableMousePressed(e); //La variable índice contendrá el número de la fila de la cual se le dio click a la tabla
                     vtn.dispose(); //Se cierra la tabla al momento de dar doble click sobre ella
-                    //Empieza la obtención de los datos del producto que se busco
+                    /*Empieza la obtención de los datos del producto que se busco y los agrega
+                    en los campos de la interfaz modificar usuario*/
                     id_usuario = workerList.get(indice).getId();
                     setIdUsuario(id_usuario);
                     desbloquearCamposUsuario();
@@ -2089,6 +2082,7 @@ public class Administrador extends javax.swing.JFrame {
                 }
             }
         });
+        //Ciclo encargado de obtener los atributos de los usuarios
         while (workerIterador.hasNext()) {
             WorkerVO workerCiclo = workerIterador.next();
             String nombreArray = workerCiclo.getName();
@@ -2097,6 +2091,7 @@ public class Administrador extends javax.swing.JFrame {
             tm.addRow(datos);
         }
     }//GEN-LAST:event_buscarUsuMODActionPerformed
+    //Métodos utilizados para guardar y regresar el id de los usuarios
     public void setIdUsuario(int id) {
         id_usuario = id;
     }
@@ -2104,9 +2099,15 @@ public class Administrador extends javax.swing.JFrame {
     public int getIdUsuario() {
         return id_usuario;
     }
+
+    /*<<cerrarSesionVentas>> método encargado de cerrar la sesión en la interfaz de ventas, el cual
+    abre otra ventana para la confirmación de cerrar sesión y dependiendo a la desición se hace tal proceso*/
     private void cerrarSesionVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarSesionVentasActionPerformed
-        JFrame contenedorSes = new JFrame();
+        //Se crean contenedores y componentes para la ventana de cerrar sesión
+        JFrame contenedorSes = new JFrame(); //Se crea un JFrame 
         contenedorSes.setBounds(screenSize.width / 4, screenSize.height / 4, 220, 100);
+        /*Se establece el tamaño y posición
+        del JFrame*/
         contenedorSes.setVisible(true);
         contenedorSes.setResizable(false);
         JPanel contenedorPanel = new JPanel();
@@ -2133,13 +2134,13 @@ public class Administrador extends javax.swing.JFrame {
         contenedorPanel.add(cancelarCerrarSesion);
         contenedorSes.add(contenedorPanel);
     }//GEN-LAST:event_cerrarSesionVentasActionPerformed
-
+    /*<<guardarProdMOD>> método que obtiene los datos de la interfaz Modificar producto y los guarda 
+    en un objeto de tipo producto para después mandarlos al método modificarProducto*/
     private void guardarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarProdMODActionPerformed
-        producto = new ProductVO();
+        producto = new ProductVO(); //Objeto que contendrá los atributos de los productos
         validarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
         //Inicia obtención de datos ingresados en la interfaz
         if (getValidarTerminadoProducto()) {
-            System.out.println("-------" + getIdProducto() + "------");
             producto.setId(getIdProducto());
             producto.setProductName(nombreProdMOD.getText().toUpperCase());
             String cantidadString = valueOf(cantidadProdMOD.getValue().toString());
@@ -2148,25 +2149,20 @@ public class Administrador extends javax.swing.JFrame {
             Double precio = Double.parseDouble(precioProdMOD.getText());
             producto.setPriceTag(precio);
             producto.setCategoryName(getCategoria());
-            System.out.println("siguiendo imagen: " + getDireccionImagen());
             producto.setImage(getDireccionImagen());
             //Finaliza obtención de datos 
-            /*
-        Se establece un injector y controlador para producto
-        Injector: se encargará de la comunicación de la base de datos con java
-        Controlador: se encargará de manejar y controlar los servicios establecidos para el administrador
-             */
+            /*Se establece un injector y controlador para producto*/
             Injector injector = Guice.createInjector(new ConfigureProductDI());
             ProductCtrlImpl productCtrl = injector.getInstance(ProductCtrlImpl.class);
             String productRecover = productCtrl.modificarProducto(producto);
-            JOptionPane.showMessageDialog(this, productRecover, "--Estado--: ", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
             //Limpiamos los campos de la pantalla de modificar producto producto
             limpiarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
             bloquearCamposProd();
             inicializarProductoEliminar();
         }
-
     }//GEN-LAST:event_guardarProdMODActionPerformed
+    //<<limpiarProducto>> método encargado de limpiar los campos de los productos
     public void limpiarProducto(JTextField nombre, JSpinner cantidad, JTextField precio, JComboBox categoria, JLabel imagen) {
         nombre.setText("");
         cantidad.getModel().setValue(0);
@@ -2174,30 +2170,20 @@ public class Administrador extends javax.swing.JFrame {
         categoria.setSelectedIndex(0);
         imagen.setIcon(null);
     }
+
+    /*<<categoriaProdMOD>> método qué manda a llamar a seleccionarCategoria para saber qué categoría
+    fue seleccionada*/
     private void categoriaProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoriaProdMODActionPerformed
         JComboBox<String> combo = (JComboBox<String>) evt.getSource(); //Se declara una variable de tipo JComboBox
-        switch (combo.getSelectedIndex()) { //Se obtiene el índice de la selección del comboBox
-            case 1:
-                categoria = "COMIDA RAPIDA";
-                break;
-            case 2:
-                categoria = "COMIDA";
-                categoriaCantidad(cantidadProdMOD);
-                break;
-            case 3:
-                categoria = "BEBIDA";
-                break;
-            case 4:
-                categoria = "SNACK";
-                break;
-            case 5:
-                categoria = "BREAD";
-        }
+        seleccionarCategoria(combo);
     }//GEN-LAST:event_categoriaProdMODActionPerformed
-
+    /*<<imagenProdMOD>> método que llama a escoger imagen y que le pasa como paramétro un JLabel
+    para que la imagen seleccionada se pinte en ese componente*/
     private void imagenProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imagenProdMODActionPerformed
         escogerImagen(imagenProdMOD2);
     }//GEN-LAST:event_imagenProdMODActionPerformed
+    /*<<escogerImagen>> método encargado de escoger una imagen en la computadora para luego ser pintada
+    en el JLabel que recibió como paramétro*/
     private void escogerImagen(JLabel etiquetaImagen) {
         fileChooser = new JFileChooser(); //Se declara una variable de tipo JFileChooser
         FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG", "jpg", "png"); //Se le especifica que tipo de archivo queremos que se nos muestre
@@ -2217,20 +2203,23 @@ public class Administrador extends javax.swing.JFrame {
         }
     }
 
+    /*<<pintarImagen>> método que recibe una dirección de alguna imagen y un componente JLabel
+    para que pueda grabar la imagen en el JLabel que recibió como paramétro*/
     private void pintarImagen(String dir, JLabel jlblImagen) {
-        ImageIcon imagen = new ImageIcon(dir);
+        ImageIcon imagen = new ImageIcon(dir); //Se crea un objeto de tipo ImageIcon 
         ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(jlblImagen.getWidth(), jlblImagen.getHeight(), Image.SCALE_DEFAULT));
-        jlblImagen.setIcon(icono);
+        /*Establece
+        medidas y la ajusta al tamaño del Label*/
+        jlblImagen.setIcon(icono); //Pinta la imagen en el JLabel correspondiente
     }
-    private void nickUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nickUsuMODActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nickUsuMODActionPerformed
 
+    //<<cancelarProdMOD>> Limpia los campos de la pantalla de Modificar producto    
     private void cancelarProdMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelarProdMODActionPerformed
-        //Limpiamos los campos de la pantalla de alta producto
         limpiarProducto(nombreProdMOD, cantidadProdMOD, precioProdMOD, categoriaProdMOD, imagenProdMOD2);
         bloquearCamposProd();
     }//GEN-LAST:event_cancelarProdMODActionPerformed
+    //<<bloquarCamposProd>> método que desabilita los campos de Producto
+
     private void bloquearCamposProd() {
         cantidadProdMOD.setEnabled(false);
         precioProdMOD.setEnabled(false);
@@ -2239,6 +2228,7 @@ public class Administrador extends javax.swing.JFrame {
         categoriaProdMOD.setEnabled(false);
     }
 
+    //<<desbloquarCamposProd>> método que habilita los campos de Producto
     private void desbloquearCamposProd() {
         cantidadProdMOD.setEnabled(true);
         precioProdMOD.setEnabled(true);
@@ -2246,38 +2236,41 @@ public class Administrador extends javax.swing.JFrame {
         precioProdMOD.setEnabled(true);
         categoriaProdMOD.setEnabled(true);
     }
-    private void precioProdALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_precioProdALKeyTyped
-        if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyChar() != '.') {
-            evt.consume();
-        }
-        if (evt.getKeyChar() == '.' && precioProdAL.getText().contains(".")) {
-            evt.consume();
-        }
-    }//GEN-LAST:event_precioProdALKeyTyped
 
+    //<precioProdAL>> método que detecta un evento de teclado y lo envía como paramétro a precioProducto
+    private void precioProdALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_precioProdALKeyTyped
+        precioProducto(evt);
+    }//GEN-LAST:event_precioProdALKeyTyped
+    //<<nombreUsuAL>> método que recibe un evento de teclado y que permite escribir solo letras
     private void nombreUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nombreUsuALKeyTyped
         char tecla = evt.getKeyChar();
         if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
             evt.consume();
         }
     }//GEN-LAST:event_nombreUsuALKeyTyped
-
+    //<<apellidoUsuAL>> método que recibe un evento de teclado y que permite escribir solo letras
     private void apellidoUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_apellidoUsuALKeyTyped
         char tecla = evt.getKeyChar();
         if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
             evt.consume();
         }
     }//GEN-LAST:event_apellidoUsuALKeyTyped
-
+//<precioProdMOD>> método que detecta un evento de teclado y lo envía como paramétro a precioProducto
     private void precioProdMODKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_precioProdMODKeyTyped
+        precioProducto(evt);
+    }//GEN-LAST:event_precioProdMODKeyTyped
+//<<precioProducto>> método que detecta un evento de teclado y solo permite escribir números y con un solo punto decimal
+
+    private void precioProducto(java.awt.event.KeyEvent evt) {
         if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyChar() != '.') {
             evt.consume();
         }
-        if (evt.getKeyChar() == '.' && precioProdMOD.getText().contains(".")) {
+        if (evt.getKeyChar() == '.' && precioProdAL.getText().contains(".")) {
             evt.consume();
         }
-    }//GEN-LAST:event_precioProdMODKeyTyped
+    }
 
+    //<<telefonoUsuAL>> Método que recibe un evento de teclado y sólo permite escribir un máximo de hasta 10 números
     private void telefonoUsuALKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_telefonoUsuALKeyTyped
         char tecla = evt.getKeyChar();
         if (telefonoUsuAL.getText().length() == 10) {
@@ -2287,53 +2280,40 @@ public class Administrador extends javax.swing.JFrame {
             evt.consume();
         }
     }//GEN-LAST:event_telefonoUsuALKeyTyped
-
+//<<nombreUsuMOD>> método que recibe un evento de teclado y permite escribir sólo letras 
     private void nombreUsuMODKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nombreUsuMODKeyTyped
         char tecla = evt.getKeyChar();
         if (!Character.isLetter(tecla) && tecla != KeyEvent.VK_SPACE && tecla != KeyEvent.VK_BACK_SPACE) {
             evt.consume();
         }
     }//GEN-LAST:event_nombreUsuMODKeyTyped
-
+    /*<<realizarReporteVentas>> Método que recibe dos fechas y las manda a un método llamado reporteVentas 
+    que se encargará de regresar una plantilla con los datos de las ventas establecidos entre el rango
+    de las dos fechas establecidas*/
     private void realizarReporteVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_realizarReporteVentasActionPerformed
         gr.reporteVentas(getFechaInicio(), getFechaFin());
     }//GEN-LAST:event_realizarReporteVentasActionPerformed
-
-    SimpleDateFormat sdf;
-    String fechaInicio = "";
+    SimpleDateFormat sdf; //Variable que tendrá el formato de las fechas escritas, ejemplo aaaa/mm/dd
+    String fechaInicio = ""; //Variable que tendrá la fecha inicio del reporte a visualizar
     private void jDateChooser1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser1PropertyChange
-        if (jDateChooser1.getDate() != null) {
-            String formato = jDateChooser1.getDateFormatString();
-            Date date = jDateChooser1.getDate();
-            sdf = new SimpleDateFormat(formato);
-            String fecha1 = String.valueOf(sdf.format(date));
+        if (jDateChooser1.getDate() != null) { //Se verifica que haya alguna fecha en el JDateChooser
+            String formato = jDateChooser1.getDateFormatString(); //Se obtiene el formato de la fecha
+            Date date = jDateChooser1.getDate(); //Se obtiene la fecha del jDateChooser
+            sdf = new SimpleDateFormat(formato); //Se convierte la fecha adquirida en el formato que se establecio anteriormente
+            String fecha1 = String.valueOf(sdf.format(date)); //Se convierte a String la fecha obtenida anteriormente
             fechaInicio = fecha1;
-            System.out.println("Fecha inicio: " + fechaInicio);
-        } else {
-            // Fechas(jDateChooser1);
         }
     }//GEN-LAST:event_jDateChooser1PropertyChange
-    String fechaFin = "";
+    String fechaFin = ""; //Variable que tendrá la fecha fin del reporte a visualizar
     private void jDateChooser2PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser2PropertyChange
         if (jDateChooser1.getDate() != null) {
             realizarReporteVentas.setEnabled(true);
-            Date datee = jDateChooser2.getDate();
-            fechaFin = String.valueOf(sdf.format(datee));
+            Date datee = jDateChooser2.getDate(); //Se obtiene la fecha del jDateChooser
+            fechaFin = String.valueOf(sdf.format(datee)); //Se convierte a String la fecha obtenida anteriormente
             System.out.println("fecha fin: " + fechaFin);
-        } else {
-            //       Fechas(jDateChooser2);
         }
     }//GEN-LAST:event_jDateChooser2PropertyChange
-
-    private void Fechas(JDateChooser jdc) {
-        DateFormat df = DateFormat.getDateInstance();
-        Date fechaActual = new Date();
-
-        System.out.println("");
-
-        jdc.setDate(fechaActual);
-    }
-
+    //Métodos encargados de regresar la fecha de inicio y fin para realizar el reporte 
     private String getFechaInicio() {
         return fechaInicio;
     }
@@ -2341,16 +2321,21 @@ public class Administrador extends javax.swing.JFrame {
     private String getFechaFin() {
         return fechaFin;
     }
+
+    /*<<siguienteProdBA>> método que ayuda a saber en qué ventana están en la interfaz Baja producto 
+    y pinta las imágenes correspondientes a su posición*/
     private void siguienteProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_siguienteProdBAActionPerformed
         contadorProdEliminar++;
         pintarImagenProducto(dirImagenesGlobal);
     }//GEN-LAST:event_siguienteProdBAActionPerformed
-
+    /*<<atrasProdBA>> método que ayuda a saber en qué ventana están en la interfaz Baja producto 
+    y pinta las imágenes correspondientes a su posición*/
     private void atrasProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_atrasProdBAActionPerformed
         contadorProdEliminar--;
         pintarImagenProducto(dirImagenesGlobal);
     }//GEN-LAST:event_atrasProdBAActionPerformed
-
+    /*<<buscarProdBA>> método que busca un producto o varios productos y los muestra en una nueva ventana organizados
+    en forma de tabla y detecta qué elemento fue seleccionado para después mostrar sus datos correspondientes*/
     private void buscarProdBAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarProdBAActionPerformed
         productoList = new ArrayList<>(); //se crea un objeto de tipo ArrayList
         String nombreProdBaBuscar = nombreProdBA.getText().toUpperCase(); //Se obtiene el nombre del producto a buscar
@@ -2390,7 +2375,6 @@ public class Administrador extends javax.swing.JFrame {
                         }
                     }
                     nombreProdBA.setText(productoList.get(indice).getProductName());
-
                     ImageIcon imagen = new ImageIcon(productoList.get(indice).getImage());
                     ImageIcon icono = new ImageIcon(imagen.getImage().getScaledInstance(contEliminarProd1.getWidth(), contEliminarProd1.getHeight(), Image.SCALE_DEFAULT));
                     contEliminarProd1.setIcon(icono);
@@ -2419,6 +2403,7 @@ public class Administrador extends javax.swing.JFrame {
             tm.addRow(datos);
         }
     }//GEN-LAST:event_buscarProdBAActionPerformed
+    /*Obtiene el nombre del producto y lo elimina con respecto al nombre*/
     private void eliminarProd(int posicion) {
         String nombreEliminar = nombreProdGlobal[posicion];
         Injector injector = Guice.createInjector(new ConfigureProductDI());
@@ -2426,6 +2411,8 @@ public class Administrador extends javax.swing.JFrame {
         String productRecover = productCtrl.bajaProducto(nombreEliminar);
         JOptionPane.showMessageDialog(this, productRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
     }
+
+    //Manda a llamar a los métodos para eliminar al usuario 
     private void eliminarUsuarioBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_eliminarUsuarioBtnActionPerformed
         opcionEliminarUsuario();
         desBtnEliminarUsu();
@@ -2433,47 +2420,41 @@ public class Administrador extends javax.swing.JFrame {
         nombreUsuarioBaja.setText("NOMBRE");
         apellidoUsuarioBaja.setText("APELLIDO");
     }//GEN-LAST:event_eliminarUsuarioBtnActionPerformed
+    /*Recibe el nombre del usuario y lo elimina con respecto al nombre*/
     private void eliminarUsuario(String nombre) {
         Injector injector = Guice.createInjector(new ConfigureUserDI());
         UserCtrlImpl userCtrl = injector.getInstance(UserCtrlImpl.class);
         String userRecover = userCtrl.bajaUsuario(nombre);
         JOptionPane.showMessageDialog(this, userRecover, "Estado", JOptionPane.INFORMATION_MESSAGE);
     }
+
+    /*Se crea un método para cada botón de baja producto para saber en qué posición se dio 
+    click para poder así saber a qué producto se le deseo eliminar y se manda a como paramétro
+    el índice del producto seleccionado*/
     private void opcionEliminarProd1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd1ActionPerformed
-        System.out.println(getIndiceProductoEliminar() + " : " + dirImagenesGlobal[getIndiceProductoEliminar()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar()]);
         confirmacionEliminarProd(getIndiceProductoEliminar());
     }//GEN-LAST:event_opcionEliminarProd1ActionPerformed
 
     private void opcionEliminarProd2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd2ActionPerformed
-        System.out.println(getIndiceProductoEliminar2() + " : " + dirImagenesGlobal[getIndiceProductoEliminar2()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar2()]);
         confirmacionEliminarProd(getIndiceProductoEliminar2());
     }//GEN-LAST:event_opcionEliminarProd2ActionPerformed
 
     private void opcionEliminarProd3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd3ActionPerformed
-        System.out.println(getIndiceProductoEliminar3() + " : " + dirImagenesGlobal[getIndiceProductoEliminar3()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar3()]);
         confirmacionEliminarProd(getIndiceProductoEliminar3());
     }//GEN-LAST:event_opcionEliminarProd3ActionPerformed
 
     private void opcionEliminarProd4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd4ActionPerformed
-        System.out.println(getIndiceProductoEliminar4() + " : " + dirImagenesGlobal[getIndiceProductoEliminar4()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar4()]);
         confirmacionEliminarProd(getIndiceProductoEliminar4());
     }//GEN-LAST:event_opcionEliminarProd4ActionPerformed
 
     private void opcionEliminarProd5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd5ActionPerformed
-        System.out.println(getIndiceProductoEliminar5() + " : " + dirImagenesGlobal[getIndiceProductoEliminar5()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar5()]);
         confirmacionEliminarProd(getIndiceProductoEliminar5());
     }//GEN-LAST:event_opcionEliminarProd5ActionPerformed
 
     private void opcionEliminarProd6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionEliminarProd6ActionPerformed
-        System.out.println(getIndiceProductoEliminar6() + " : " + dirImagenesGlobal[getIndiceProductoEliminar6()]
-                + " nombre: " + nombreProdGlobal[getIndiceProductoEliminar6()]);
         confirmacionEliminarProd(getIndiceProductoEliminar6());
     }//GEN-LAST:event_opcionEliminarProd6ActionPerformed
+    /*<<opcionEliminarUsuario>> método encargado de crear una ventana de verificación para eliminar un usuario*/
     private void opcionEliminarUsuario() {
         JFrame contenedor = new JFrame();
         contenedor.setBounds(screenSize.width / 4, screenSize.height / 4, 280, 120);
@@ -2502,6 +2483,7 @@ public class Administrador extends javax.swing.JFrame {
         contenedor.add(contenedorPanel);
     }
 
+    /*<<confirmacionEliminarPro>> método encargado de mostrar una ventana para la verificación de eliminar un producto*/
     private void confirmacionEliminarProd(int indice) {
         JFrame contenedor = new JFrame();
         contenedor.setBounds(screenSize.width / 4, screenSize.height / 4, 280, 120);
@@ -2530,7 +2512,11 @@ public class Administrador extends javax.swing.JFrame {
         contenedorPanel.add(cancelar);
         contenedor.add(contenedorPanel);
     }
-    String nickEliminarGlobal;
+    String nickEliminarGlobal; //Variable encargada de tener el nick de un usuario
+
+    /*<<buscarUsuarioBaja>> Método que busca a los usuarios y muestra una tabla en donde se encuentran todos
+    así como también se le agrega un escuchador a la tabla para saber a qué usuario se selecciono
+    y con respecto a eso se muestra la imagen correspondiente al usuario*/
     private void buscarUsuarioBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buscarUsuarioBajaActionPerformed
         workerList = new ArrayList<>(); //se crea un objeto de tipo ArrayList
         /*Se declara un injector y se le declara el tipo de clase a la que queremos que haga referencia, en este caso
@@ -2579,6 +2565,7 @@ public class Administrador extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_buscarUsuarioBajaActionPerformed
+    //Método bloq y des BtnEliminarUsu que contienen el estado de la variable eliminarUsuarioBtn
     private void bloqBtnEliminarUsu() {
         eliminarUsuarioBtn.setEnabled(false);
     }
@@ -2586,43 +2573,95 @@ public class Administrador extends javax.swing.JFrame {
     private void desBtnEliminarUsu() {
         eliminarUsuarioBtn.setEnabled(true);
     }
-    private void emailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emailActionPerformed
-        try {
-            Properties props = new Properties();
-            props.setProperty("mail.smtp.host", "smtp.gmail.com");
-            props.setProperty("mail.smtp.starttls", "true");
-            props.setProperty("mail.smtp.port", "587");
-            props.setProperty("mail.smtp.auth", "true");
-            Session sesion = Session.getDefaultInstance(props);
-            String correoRemitente = "vermonsadecv@gmail.com";
-            String passwordRemitente = "vermon123";
-            String correoReceptor = "gustavosh0154@gmail.com";
-            String asunto = "Mi primer correo en java";
-            String mensaje = "Este es el contenido de mi primer video";
-            MimeMessage message = new MimeMessage(sesion);
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(correoReceptor));
-            message.setSubject(asunto);
-            message.setText(mensaje);
-            Transport t = sesion.getTransport("smtp");
-            t.connect(correoRemitente, passwordRemitente);
-            t.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
-            t.close();
-            JOptionPane.showMessageDialog(null, "Correo electronico enviado");
 
-            message.setFrom(new InternetAddress(correoRemitente));
-        } catch (AddressException ex) {
-            Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MessagingException ex) {
-            Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+    /*<<enviarEmail>> Método que establece las configuraciones correspondientes para el uso de la paquetería
+    JavaMail para el envío de correos electrónicos*/
+    private void enviarEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enviarEmailActionPerformed
+        //Obtenemos direccion del archivo a enviar
+        String direccion = escogerArchivo();
+        System.out.println("direccionnnnnn " + direccion);
+        if (direccion != null) {
+            //El correo gmail de envio
+            String correoEnvia = "vermonsadecv@gmail.com";
+            String claveCorreo = "vermon123";
+
+            //La configuración para enviar correo 
+            Properties props = new Properties();
+            props.put("mail.smtp.host", "smtp.gmail.com");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.user", correoEnvia);
+            props.put("mail.password", claveCorreo);
+            //Obtener la sesión
+            Session session = Session.getInstance(props, null);
+            try {
+                MimeMessage mimeMessage = new MimeMessage(session);
+                //Agregar quién envía el correo
+                mimeMessage.setFrom(new InternetAddress(correoEnvia, "Dato java"));
+                //Agregar el destinatario del mensaje
+                String correoRemitente = "gustavosh0154@gmail.com";
+                String asunto = "Mi segundo correo en java";
+                String mensaje = "Este es el contenido de mi segundo mensaje";
+                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(correoRemitente));
+                mimeMessage.setSubject(asunto);
+                MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                MimeBodyPart mimeBodyPartAdjunto = new MimeBodyPart();
+                mimeBodyPartAdjunto.attachFile(direccion);
+                mimeBodyPart.setText(mensaje);
+                //Crear el multipart para agregar la parte del mensaje anterior
+                Multipart multipart = new MimeMultipart();
+                multipart.addBodyPart(mimeBodyPart);
+                multipart.addBodyPart(mimeBodyPartAdjunto);
+                //Agregar el multipart al cuerpo del mensaje
+                mimeMessage.setContent(multipart);
+                //Enviar mensaje
+                Transport transport = session.getTransport("smtp");
+                transport.connect(correoEnvia, claveCorreo);
+                transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+                transport.close();
+
+                JOptionPane.showMessageDialog(null, "Mensaje enviado");
+            } catch (AddressException ex) {
+                Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (MessagingException ex) {
+                Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Administrador.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Selecciona un archivo", "Mensaje de error", JOptionPane.ERROR_MESSAGE);
         }
 
+    }//GEN-LAST:event_enviarEmailActionPerformed
+    /*Método encargado de escoger la dirección de un archivo y retornarla*/
+    private String escogerArchivo() {
+        fileChooser = new JFileChooser(); //Se declara una variable de tipo JFileChooser
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("PDF", "pdf"); //Se le especifica que tipo de archivo queremos que se nos muestre
+        fileChooser.setFileFilter(filter); //Se le pasa como parametro el filtrado a la variable fileChooser 
+        int regresaValor = fileChooser.showOpenDialog(null); //Variable encargada de verificar que la ventana para escoger la imagen se haya acompletado con éxito
+        //Acción del fileChooser
+        if (regresaValor == JFileChooser.APPROVE_OPTION) {
+            //Crear propiedades para ser utilizadas por fileChooser
+            File archivoElegido = fileChooser.getSelectedFile();
+            //Obteniendo la dirección del archivo
+            String direccion = archivoElegido.getPath();
+            return direccion;
+        } else {
+            return null;
+        }
 
-    }//GEN-LAST:event_emailActionPerformed
+    }
 
+    /*Método encargado de llamar al método escogerImagen el cual escoge la dirección de la imagen y lo pinta
+    con respecto al JLbael pasado como parámetro*/
     private void fotoUsuMOD1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fotoUsuMOD1ActionPerformed
         escogerImagen(fotoUsuMOD2);
     }//GEN-LAST:event_fotoUsuMOD1ActionPerformed
-
+    /*<<guardarUsuMOD>> Método encargado de obtener los datos de la interfaz de Modificar usuario y guardarlos en 
+    un objeto de tipo WorkerVO y al final vuelve a limpiar los campos de la misma interfaz*/
     private void guardarUsuMODActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarUsuMODActionPerformed
         WorkerVO trabajador = new WorkerVO();
         UserVO usuario = new UserVO();
@@ -2662,6 +2701,8 @@ public class Administrador extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_guardarUsuMODActionPerformed
+    //Bloquea los campos de usuario
+
     private void bloquearCamposUsuario() {
         nombreUsuMOD.setEnabled(false);
         apellidoUsuMOD.setEnabled(false);
@@ -2673,6 +2714,7 @@ public class Administrador extends javax.swing.JFrame {
         fotoUsuMOD1.setEnabled(false);
     }
 
+    //Desbloquea los campos de usuario
     private void desbloquearCamposUsuario() {
         nombreUsuMOD.setEnabled(true);
         apellidoUsuMOD.setEnabled(true);
@@ -2684,14 +2726,17 @@ public class Administrador extends javax.swing.JFrame {
         fotoUsuMOD1.setEnabled(true);
     }
 
+    //Método que retorna el nombre de la categoría
     private String getCategoria() {
         return categoria;
     }
 
+    //Método que guarda la dirección de alguna imagen
     private void setDireccionImagen(String direccion) {
         direcImagen = direccion;
     }
 
+    //Método que devulve la dirección de la imagen guardada en el método <<setDireccionImagen>>
     private String getDireccionImagen() {
         return direcImagen;
     }
@@ -2732,9 +2777,9 @@ public class Administrador extends javax.swing.JFrame {
     private javax.swing.JTextField direccionUsuAL;
     private javax.swing.JTextField direccionUsuMOD;
     private javax.swing.JButton eliminarUsuarioBtn;
-    private javax.swing.JButton email;
     private javax.swing.JTextField emailUsuAL;
     private javax.swing.JTextField emailUsuMOD;
+    private javax.swing.JButton enviarEmail;
     private javax.swing.JLabel etiquetaNomProdAL;
     private javax.swing.JButton fotoUsuAL;
     private javax.swing.JLabel fotoUsuAL2;

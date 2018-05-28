@@ -7,7 +7,10 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
 import com.coffee.back.dao.AbstractDAO;
+import java.net.URL;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.view.JasperViewer;
 
 
@@ -24,9 +27,8 @@ public class GenerarReportes extends AbstractDAO{
             JasperViewer jv=new JasperViewer(j,false);
             jv.setTitle("Reporte ventas");
             jv.setVisible(true);
-        } catch (Exception e) {
+        } catch (SQLException | JRException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar el reporte "+e);
         }
     }
-    
 }
