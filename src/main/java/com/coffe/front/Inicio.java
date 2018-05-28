@@ -8,14 +8,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import javax.swing.JOptionPane;
 
-/*Clase que cuenta con la funcionalidad de aceptar datos y mandarlos a los controladores
-para verificar los datos en la base de datos y si existen abrirles la interfaz correspondiente
+/**
+ * Clase que cuenta con la funcionalidad de aceptar datos y mandarlos a los
+ * controladores para verificar los datos en la base de datos y si existen
+ * abrirles la interfaz correspondiente
  */
 public class Inicio extends javax.swing.JFrame {
 
     public Inicio() {
         initComponents();
-        //  setIconImage(new ImageIcon(getClass().getResource("/vermon/Logo.png")).getImage());
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -133,6 +134,7 @@ public class Inicio extends javax.swing.JFrame {
                 case ADMINISTRADOR:
                     this.dispose();
                     Administrador admin = new Administrador();
+                    admin.setVisible(true);
                     break;
                 case CAJERO:
                     this.dispose();
@@ -158,11 +160,6 @@ public class Inicio extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -179,9 +176,6 @@ public class Inicio extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             new Inicio().setVisible(true);
         });

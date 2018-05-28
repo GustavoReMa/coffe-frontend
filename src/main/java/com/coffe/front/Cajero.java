@@ -28,7 +28,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 /**
  *
@@ -46,6 +45,7 @@ public class Cajero extends javax.swing.JFrame {
     private int countStockRows = 0;
     private double totalSale = 0.0;
     private int saleID;
+    private int lastIndexChanged = -1;
 
     public Cajero(UserVO user) {
         initComponents();
@@ -374,7 +374,7 @@ public class Cajero extends javax.swing.JFrame {
         // validar y llevar acabo la funcionalidad
         // revisar si no hay una venta actual.
         if (areThereProductsOnSale) {
-            JOptionPane.showMessageDialog(this, "Usted necesita finalizar la venta","Venta", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Usted necesita finalizar la venta", "Venta", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -491,7 +491,7 @@ public class Cajero extends javax.swing.JFrame {
     }
 
     private void productToFindButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productToFindButtonActionPerformed
-        if (!productToFindTextField.getText().equals("")) {
+        if (!productToFindTextField.getText().equals("") && productToFindTextField.getText().matches("[a-zA-Z]+")) {
             List<ProductVO> productsMatches = this.productCtrl.buscarProducto(productToFindTextField.getText().toUpperCase());
             if (!productsMatches.isEmpty()) {
                 DefaultTableModel tableModel = (DefaultTableModel) productsTable.getModel();
@@ -499,14 +499,25 @@ public class Cajero extends javax.swing.JFrame {
                     // verificar que el producto haya cambio a un valor mayor a 0
                     //productsTable.getValueAt(e.getLastRow(),e.getColumn());
                     if (e.getType() == TableModelEvent.UPDATE) {
-                        changedRowSelected= true;
+                        // fue actualizado revisamos que la cantidad establecida sea
+                        // mayor a 0 para un producto
+                        String quantity = (String) productsTable.getValueAt(e.getLastRow(), 2);
+                        short quantityProduct = (short) productsTable.getValueAt(productsTable.getSelectedRow(), 5);
+                        short quantityShort = Short.parseShort(quantity);
+                        if (quantityShort > 0 && quantityShort <= quantityProduct) {
+                            changedRowSelected = true;
+                            lastIndexChanged = e.getLastRow();
+                        }
+                        //no es permitido un producto con menor cantidad
                     }
                 });
                 productsTable.getSelectionModel().addListSelectionListener((e) -> {
-                    System.out.println("afuera " + e.getValueIsAdjusting());
                     if (productsTable.getSelectedRow() > -1) {
-                        System.out.println("adentro " + e.getValueIsAdjusting());
                         isRowSelectedProductFound = true;
+                        if(productsTable.getSelectedRow() == lastIndexChanged)
+                            changedRowSelected = true;
+                        else 
+                            changedRowSelected = false;
                     }
                 });
                 DefaultTableModel defaults = ((DefaultTableModel) productsTable.getModel());
@@ -523,8 +534,9 @@ public class Cajero extends javax.swing.JFrame {
                     vector.add(productsMatches.get(row).getQuantity());
                     defaults.addRow(vector);
                 }
-            }
+            } // else no se ha encontrado algun producto con las caracteristicas
         }
+        //else entrada incorrecta
     }//GEN-LAST:event_productToFindButtonActionPerformed
 
     private void resetTextBox() {
@@ -541,16 +553,10 @@ public class Cajero extends javax.swing.JFrame {
             DefaultTableModel productsFoundModel = ((DefaultTableModel) productsTable.getModel());
             try {
                 String quantitySaleProduct = (String) productsFoundModel.getValueAt(productsTable.getSelectedRow(), 2);
-                short quantityProduct = (short) productsFoundModel.getValueAt(productsTable.getSelectedRow(), 5);
-                Vector vector = new Vector();
                 int value = Integer.parseInt(quantitySaleProduct);
-                if (value > 0 && value <= quantityProduct) {
-                    vector.add("");
-                    vector.add("");
-                } else {
-                    // No puedes vender mas producto de lo que existe.
-                    return;
-                }
+                Vector vector = new Vector();
+                vector.add("");
+                vector.add("");
                 vector.add(productsFoundModel.getValueAt(productsTable.getSelectedRow(), 0));
                 vector.add(productsFoundModel.getValueAt(productsTable.getSelectedRow(), 1));
                 vector.add(productsFoundModel.getValueAt(productsTable.getSelectedRow(), 3));
@@ -560,7 +566,6 @@ public class Cajero extends javax.swing.JFrame {
 
                 stockModel.addRow(vector);
             } catch (Exception ex) {
-                // Debe ser numero.
                 ex.printStackTrace();
                 return;
             }
@@ -571,7 +576,7 @@ public class Cajero extends javax.swing.JFrame {
             }
             productsFoundModel.setRowCount(4);
             isRowSelectedProductFound = false;
-            changedRowSelected= false;
+            changedRowSelected = false;
             resetTextBox();
         } else {
             // Actually no row is selected
@@ -591,11 +596,30 @@ public class Cajero extends javax.swing.JFrame {
     }//GEN-LAST:event_cashTextFieldKeyReleased
 
     public static void main(String args[]) {
-        UserVO userVO = new UserVO();
-        userVO.setPassword("pedro12");
-        userVO.setUserName("PED@EMP");
-        userVO.setUserType(UserType.CAJERO);
-        Cajero cajero = new Cajero(userVO);
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        // Invocacion de prueba de ajuste
+        java.awt.EventQueue.invokeLater(() -> {
+            UserVO userVO = new UserVO();
+            userVO.setPassword("pedro12");
+            userVO.setUserName("PED@EMP");
+            userVO.setUserType(UserType.CAJERO);
+            Cajero cajero = new Cajero(userVO);
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
